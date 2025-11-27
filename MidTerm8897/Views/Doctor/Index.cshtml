@@ -1,0 +1,40 @@
+﻿@model IEnumerable<MidTerm8897.Models.Doctors>
+
+@{
+    ViewData["Title"] = "Doctors List";
+}
+
+<h2 class="text-center mb-4">Doctors List</h2>
+
+<p>
+    <a asp-controller="Doctor" asp-action="Add" class="btn btn-primary">Add new Doctor</a>
+</p>
+
+<div class="container">
+    <div class="row">
+        @foreach (var doctor in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-header font-weight-bold bg-light">
+                        Dr. @doctor.name
+                    </div>
+                    <div class="card-body">
+                        <p>
+                            <strong>Specialization:</strong> @doctor.specialization <br />
+                            <strong>Phone:</strong> @doctor.phone <br />
+                            <strong>Email:</strong> @doctor.email
+                        </p>
+                        @if (!string.IsNullOrEmpty(doctor.image))
+                        {
+                            <img src="@doctor.image" alt="Doctor Image" class="img-fluid mb-2 rounded" style="max-height:180px;" />
+                        }
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="@Url.Action("Detail", "Doctor", new { id = doctor.id_doctor })" class="btn btn-outline-secondary btn-sm">Read more...</a>
+                        <a href="@Url.Action("Register", "Appointment", new { id = doctor.id_doctor })" class="btn btn-primary btn-sm">Register</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>

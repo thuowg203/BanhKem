@@ -1,0 +1,132 @@
+﻿@model MidTerm8897.Models.Doctors
+
+
+@{
+    ViewData["Title"] = "Doctor Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .detail-section .row {
+        margin-bottom: 0;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: flex-start;
+        padding-top: 0.85rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .detail-label-container {
+        flex: 0 0 140px;
+        padding-right: 10px;
+        color: #495057;
+    }
+
+    .detail-value-container {
+        flex-grow: 1;
+        word-break: break-word;
+        color: #212529;
+    }
+
+    .doctor-profile-image {
+        max-width: 200px; /* Match approximate image width from screenshot */
+        height: auto;
+        object-fit: contain;
+        border-radius: .25rem;
+    }
+
+    .action-buttons-container {
+        margin-top: 25px;
+        padding-bottom: 20px;
+    }
+
+        .action-buttons-container .btn {
+            margin-right: 8px;
+        }
+
+    .back-to-list-link {
+        margin-left: 16px;
+        color: #007bff;
+        text-decoration: none;
+    }
+
+        .back-to-list-link:hover {
+            text-decoration: underline;
+        }
+
+    .work-exp-label div:nth-child(2) { /* For "Experience:" */
+        /* The image shows a very slight, almost imperceptible indent for "Experience:".
+               If a more pronounced indent is desired, padding-left could be used here.
+               For now, keeping it aligned as it's very subtle in the source image.
+               padding-left: 0.5em; */
+    }
+
+    .work-exp-value div:first-child {
+        /* Main description line */
+    }
+
+    .work-exp-value div:last-child {
+        /* "years" line, appears aligned under the start of the description in the image */
+    }
+</style>
+
+<div class="container mt-4">
+    <h2 class="text-center mb-5">Doctor Details</h2>
+
+    <div class="row">
+        <div class="col-md-4 text-center text-md-left mb-3 mb-md-0">
+            @if (!string.IsNullOrEmpty(Model.image))
+            {
+                <img src="/@Model.image" alt="Photo of Dr. @Model.name" class="doctor-profile-image" />
+            }
+            else
+            {
+                <img src="https://via.placeholder.com/200x260.png?text=No+Image" alt="No image available" class="doctor-profile-image">
+            }
+        </div>
+
+        <div class="col-md-8 detail-section">
+            <div class="detail-item">
+                <div class="detail-label-container">Name:</div>
+                <div class="detail-value-container">Dr. @Model.name</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label-container">Specialization:</div>
+                <div class="detail-value-container">@Model.specialization</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label-container">Phone:</div>
+                <div class="detail-value-container">@Model.phone</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label-container">Email:</div>
+                <div class="detail-value-container">@Model.email</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label-container">Address:</div>
+                <div class="detail-value-container">@Model.address</div>
+            </div>
+            <div class="detail-item">
+                <div class="detail-label-container work-exp-label">
+                    <div>Work</div>
+                    <div>Experience:</div>
+                </div>
+                <div class="detail-value-container work-exp-value">
+                    <div>@Model.work_experience</div>
+                    <div>years</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row action-buttons-container">
+        <div class="col-12">
+            <a asp-action="Update" asp-controller="Doctor" asp-route-id="@Model.id_doctor" class="btn btn-primary">Edit</a>
+            <a asp-action="Delete" asp-controller="Doctor" asp-route-id="@Model.id_doctor" class="btn btn-primary">Delete</a>
+            <a asp-action="Index" asp-controller="Doctor" class="back-to-list-link">Back to List</a>
+        </div>
+    </div>
+</div>

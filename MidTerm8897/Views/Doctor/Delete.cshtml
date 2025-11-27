@@ -1,0 +1,32 @@
+﻿@model MidTerm8897.Models.Doctors
+
+@{
+	ViewData["Title"] = "Delete Doctor";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+	<h2 class="text-center mb-4">Delete Doctor</h2>
+	<div class="card">
+		<div class="card-header">
+			Are you sure you want to delete this doctor?
+		</div>
+		<div class="card-body">
+			<p><strong>Name:</strong> @Model.name</p>
+			<p><strong>Specialization:</strong> @Model.specialization</p>
+			<p><strong>Phone:</strong> @Model.phone</p>
+			<p><strong>Email:</strong> @Model.email</p>
+			<p><strong>Address:</strong> @Model.address</p>
+			@if (!string.IsNullOrEmpty(Model.image))
+			{
+				<img src="/@Model.image" alt="Doctor Image" class="img-fluid mb-2" style="max-height:180px;" />
+			}
+		</div>
+		<div class="card-footer text-end">
+			<form asp-action="Delete" method="post">
+				<input type="hidden" name="id_doctor" value="@Model.id_doctor" />
+				<button type="submit" class="btn btn-danger">Delete</button>
+				<a href="@Url.Action("Index", "Doctor")" class="btn btn-secondary ms-2">Cancel</a>
+			</form>
+		</div>
+	</div>

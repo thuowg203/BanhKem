@@ -1,0 +1,31 @@
+﻿@model MidTerm8897.Models.Patients
+
+@{
+    ViewData["Title"] = "Add Patient";
+}
+
+<h2>Add New Patient</h2>
+
+<form asp-action="Add" method="post">
+    <div class="form-group">
+        <label asp-for="name"></label>
+        <input asp-for="name" class="form-control" />
+        <span asp-validation-for="name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="phone"></label>
+        <input asp-for="phone" class="form-control" />
+        <span asp-validation-for="phone" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="address"></label>
+        <input asp-for="address" class="form-control" />
+        <span asp-validation-for="address" class="text-danger"></span>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

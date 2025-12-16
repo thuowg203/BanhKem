@@ -1,0 +1,50 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Product
+
+@{
+    ViewData["Title"] = "Chi Tiết Sản Phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3 class="mb-0">Chi Tiết Sản Phẩm</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <label class="col-sm-3 fw-bold">Tên sản phẩm:</label>
+                <div class="col-sm-9">@Model.Name</div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-3 fw-bold">Mô tả:</label>
+                <div class="col-sm-9">@Model.Description</div>
+            @* </div> *@
+            @* <div class="row mb-3"> *@
+            @*     <label class="col-sm-3 fw-bold">Giá:</label> *@
+            @*     <div class="col-sm-9">@Model.Price.ToString("N0") ₫</div> *@
+            @* </div> *@
+            @* <div class="row mb-3"> *@
+            @*     <label class="col-sm-3 fw-bold">Số lượng:</label> *@
+            @*     <div class="col-sm-9">@Model.Quantity</div> *@
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-3 fw-bold">Hình ảnh:</label>
+                <div class="col-sm-9">
+                    <img src="@Model.Image" alt="Hình ảnh sản phẩm" class="img-fluid rounded" style="max-height: 200px;" />
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-3 fw-bold">Nhãn sản phẩm:</label>
+                <div class="col-sm-9">@Model.Badge</div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-sm-3 fw-bold">Loại sản phẩm:</label>
+                <div class="col-sm-9">@Model.Category?.TenLoai</div>
+            </div>
+        </div>
+        <div class="card-footer text-end">
+            <a  asp-action="Update" asp-route-id="@Model?.Id" class="btn btn-warning me-2">Chỉnh sửa</a>
+            <a asp-action="Index" class="btn btn-secondary">Trở về danh sách</a>
+        </div>
+    </div>
+</div>

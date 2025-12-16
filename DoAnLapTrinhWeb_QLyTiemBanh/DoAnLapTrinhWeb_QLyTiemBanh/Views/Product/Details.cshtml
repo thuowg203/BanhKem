@@ -1,0 +1,314 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Product
+
+@{
+    // Đổi Title để khớp với tên sản phẩm, hoặc giữ nguyên nếu muốn
+    ViewData["Title"] = Model.Name ?? "Chi Tiết Sản Phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- Thêm CSS để tùy chỉnh giao diện -->
+<style>
+    body {
+        background-color: #fcfaf8; /* Màu nền giống ảnh */
+    }
+
+    .product-detail-container {
+        font-family: 'Helvetica Neue', sans-serif; /* Font chữ chung */
+        color: #333;
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb-custom {
+        font-size: 0.85rem;
+        color: #888;
+        margin-bottom: 2rem;
+    }
+
+        .breadcrumb-custom a {
+            color: #888;
+            text-decoration: none;
+        }
+
+        .breadcrumb-custom span {
+            margin: 0 0.5rem;
+        }
+
+    /* Hình ảnh */
+    .main-image-container img {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .thumbnail-container {
+        gap: 10px; /* Khoảng cách giữa các ảnh nhỏ */
+    }
+
+    .thumbnail-item img {
+        width: 100%;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: border-color 0.3s;
+    }
+
+        .thumbnail-item img:hover, .thumbnail-item.active img {
+            border-color: #a4452e; /* Màu viền khi active/hover */
+            border-width: 2px;
+        }
+
+    /* Cột thông tin bên phải */
+    .product-info-column {
+        padding-left: 2.5rem; /* Tăng khoảng cách với cột ảnh */
+    }
+
+    .product-title {
+        font-family: 'Georgia', serif; /* Font chữ cho tiêu đề sản phẩm */
+        font-size: 2.5rem;
+        color: #a4452e; /* Màu tiêu đề */
+        font-weight: 500;
+    }
+
+    .product-price {
+        font-size: 1.75rem;
+        color: #a4452e;
+        font-weight: 600;
+        margin-top: 1rem;
+    }
+
+    /* Bộ chọn số lượng */
+    .quantity-selector {
+        border: 1px solid #ddd;
+        display: inline-flex;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+        .quantity-selector button, .quantity-selector input {
+            background-color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .quantity-selector input {
+            width: 50px;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+
+            .quantity-selector input:focus {
+                outline: none;
+            }
+
+    /* Bộ chọn kích thước */
+    .size-selector .size-label {
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #555;
+        margin-right: 1rem;
+    }
+
+    .size-selector .btn-size {
+        border: 1px solid #ddd;
+        background-color: white;
+        color: #333;
+        margin-right: 10px;
+        padding: 0.5rem 1.5rem;
+        transition: all 0.3s;
+    }
+
+        .size-selector .btn-size.active {
+            background-color: #a4452e;
+            color: white;
+            border-color: #Da5036;
+        }
+
+    /* Nút thêm vào giỏ hàng */
+    .btn-add-to-cart {
+        background-color: white;
+        border: 2px solid #Da5036;
+        color: #Da5036;
+        font-weight: bold;
+        padding: 0.75rem;
+        width: 100%;
+        border-radius: 4px;
+        transition: all 0.3s;
+        letter-spacing: 1px;
+    }
+
+        .btn-add-to-cart:hover {
+            background-color: #a4452e;
+            color: white;
+        }
+
+    .price-in-button {
+        font-size: 0.9rem;
+        font-weight: normal;
+    }
+
+    /* Phần mô tả */
+    .product-accordion .accordion-header {
+        border-top: 1px solid #eee;
+        padding: 1rem 0;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+    }
+
+        .product-accordion .accordion-header:last-of-type {
+            border-bottom: 1px solid #eee;
+        }
+
+    .product-accordion .accordion-content {
+        padding-bottom: 1rem;
+        color: #555;
+        line-height: 1.6;
+    }
+
+    .accordion-arrow {
+        transition: transform 0.3s;
+    }
+
+    .accordion-header.open .accordion-arrow {
+        transform: rotate(180deg);
+    }
+
+    /* Phần bảo quản */
+    .storage-info {
+        margin-top: 2rem;
+    }
+
+        .storage-info h5 {
+            font-weight: bold;
+        }
+
+        .storage-info p {
+            color: #555;
+        }
+</style>
+
+<div class="container product-detail-container my-5">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-custom" aria-label="breadcrumb">
+        <a href="/">TRANG CHỦ</a><span>›</span><a href="#">BÁNH KEM - BÁNH SINH NHẬT</a><span>›</span>@Model.Name.ToUpper()
+    </nav>
+
+    <div class="row">
+        <!-- Cột trái: hình ảnh -->
+        <div class="col-lg-7">
+            <div class="main-image-container mb-3">
+                <img id="mainProductImage" src="@Model.Image" alt="@Model.Name" class="img-fluid">
+            </div>
+
+            @* <div class="thumbnail-container d-flex"> *@
+            @*     @for (int i = 0; i < 6; i++) *@
+            @*     { *@
+            @*         <div class="thumbnail-item @(i == 0 ? "active" : "")"> *@
+            @*             <img src="/@Model.Image" onclick="changeImage(this.src)" alt="Thumbnail @i"> *@
+            @*         </div> *@
+            @*     } *@
+            @* </div> *@
+
+            <div class="storage-info mt-5">
+                <h5>Bảo quản</h5>
+                <p>Các loại bánh sinh nhật khác nhau có yêu cầu bảo quản khác nhau. Bảo quản bánh ngọt của bạn đúng cách sẽ đảm bảo hương vị tuyệt vời.</p>
+                <p>❄️ Bảo quản <strong>lạnh</strong> trong bao bì hoặc hộp bánh để tránh bị ám mùi từ thực phẩm khác.</p>
+                <p>🗓️ Ăn trong vòng <strong>3 ngày</strong>.</p>
+            </div>
+        </div>
+
+        <!-- Cột phải: thông tin & đặt hàng -->
+        <div class="col-lg-5 product-info-column">
+            <h1 class="product-title">@Model.Name</h1>
+            <p class="product-price">@Model.Price.ToString("N0")₫</p>
+
+            <!-- FORM gửi AddToCart -->
+            <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post">
+                <input type="hidden" name="productId" value="@Model.Id" />
+                <input type="hidden" name="quantity" id="hiddenQuantityInput" value="1" />
+
+                <!-- Bộ chọn số lượng -->
+                <div class="quantity-selector my-4">
+                    <button type="button" onclick="changeQuantity(-1)">-</button>
+                    <input type="text" id="quantityInput" value="1" readonly>
+                    <button type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+
+                <!-- Bộ chọn kích thước -->
+                <div class="size-selector d-flex align-items-center my-4">
+                    <span class="size-label">KÍCH CỠ</span>
+                    <button type="button" class="btn btn-size active">12 CM</button>
+                    <button type="button" class="btn btn-size">15 CM</button>
+                </div>
+
+                <!-- Nút thêm vào giỏ hàng -->
+                <button type="submit" class="btn btn-add-to-cart">
+                    THÊM VÀO GIỎ HÀNG <span class="price-in-button">• @Model.Price.ToString("N0")₫</span>
+                </button>
+            </form>
+
+            <!-- Accordion mô tả -->
+            <div class="product-accordion mt-4">
+                <div class="accordion-header open" onclick="toggleAccordion(this)">
+                    <span>MÔ TẢ</span>
+                    <span class="accordion-arrow">▼</span>
+                </div>
+                <div class="accordion-content" style="display: block;">
+                    <p style="white-space: pre-wrap;">@Model.Description</p>
+                </div>
+
+                <div class="accordion-header" onclick="toggleAccordion(this)">
+                    <span>CÓ GÌ ĐẶC BIỆT?</span>
+                    <span class="accordion-arrow">▶</span>
+                </div>
+                <div class="accordion-content" style="display: none;">
+                    <p>@(Model.Badge ?? "Sản phẩm không có thông tin đặc biệt.")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function changeImage(src) {
+            document.getElementById('mainProductImage').src = src;
+            document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.parentElement.classList.add('active');
+        }
+
+        function changeQuantity(amount) {
+            const input = document.getElementById('quantityInput');
+            const hidden = document.getElementById('hiddenQuantityInput');
+            let value = parseInt(input.value) + amount;
+            value = Math.max(1, value);
+            input.value = value;
+            hidden.value = value;
+        }
+
+        function toggleAccordion(header) {
+            const content = header.nextElementSibling;
+            const arrow = header.querySelector('.accordion-arrow');
+            const isOpen = content.style.display === "block";
+
+            content.style.display = isOpen ? "none" : "block";
+            arrow.textContent = isOpen ? '▶' : '▼';
+            header.classList.toggle("open", !isOpen);
+        }
+
+        document.querySelectorAll('.btn-size').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.btn-size').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+}
+}

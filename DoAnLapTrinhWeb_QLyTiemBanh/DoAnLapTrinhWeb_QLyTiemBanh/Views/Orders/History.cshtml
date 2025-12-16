@@ -1,0 +1,169 @@
+﻿@model IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.Order>
+@using DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums
+
+@{
+    ViewData["Title"] = "Lịch sử mua hàng";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4 text-primary">
+        <i class="bi bi-clock-history me-2"></i> Lịch sử mua hàng
+    </h2>
+
+    <!-- Thông báo -->
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+            @TempData["Success"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+            @TempData["Error"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <!-- Bộ lọc trạng thái -->
+    <div class="mb-3 d-flex flex-wrap gap-2">
+        <a asp-action="History" class="btn @(ViewBag.Filter == null ? "btn-primary" : "btn-outline-primary")">Tất cả</a>
+        <a asp-action="History" asp-route-filter="@OrderStatus.ChoXacNhan" class="btn @(ViewBag.Filter == OrderStatus.ChoXacNhan.ToString() ? "btn-primary" : "btn-outline-primary")">Chờ xác nhận</a>
+        <a asp-action="History" asp-route-filter="@OrderStatus.ChoLayHang" class="btn @(ViewBag.Filter == OrderStatus.ChoLayHang.ToString() ? "btn-info text-white" : "btn-outline-info")">Chờ lấy hàng</a>
+        <a asp-action="History" asp-route-filter="@OrderStatus.ChoGiaoHang" class="btn @(ViewBag.Filter == OrderStatus.ChoGiaoHang.ToString() ? "btn-warning text-dark" : "btn-outline-warning")">Chờ giao hàng</a>
+        <a asp-action="History" asp-route-filter="@OrderStatus.DaGiao" class="btn @(ViewBag.Filter == OrderStatus.DaGiao.ToString() ? "btn-success" : "btn-outline-success")">Đã giao</a>
+        <a asp-action="History" asp-route-filter="@OrderStatus.DaHuy" class="btn @(ViewBag.Filter == OrderStatus.DaHuy.ToString() ? "btn-danger" : "btn-outline-danger")">Đã hủy</a>
+    </div>
+
+    <!-- Bảng hiển thị -->
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover table-bordered align-middle text-center mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.Any())
+                    {
+                        <tr>
+                            <td colspan="5" class="text-muted p-4">
+                                <i class="bi bi-box-seam fs-3"></i><br />
+                                Không có đơn hàng nào phù hợp.
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var order in Model)
+                        {
+                            <tr>
+                                <td class="fw-bold">#@order.Id</td>
+                                <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="text-danger fw-bold">@order.TotalPrice.ToString("N0") đ</td>
+                                <td>
+                                    @if (order.PaymentStatus == "Đã thanh toán")
+                                    {
+                                        <span class="badge bg-success">Đã thanh toán</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Chưa thanh toán</span>
+                                    }
+                                </td>
+                                <td>
+                                    @switch (order.OrderStatus)
+                                    {
+                                        case OrderStatus.ChoXacNhan:
+                                            <span class="badge bg-secondary"><i class="bi bi-hourglass-split"></i> Chờ xác nhận</span>
+                                            ;
+                                            break;
+                                        case OrderStatus.ChoLayHang:
+                                            <span class="badge bg-info text-dark"><i class="bi bi-basket2"></i> Chờ lấy hàng</span>
+                                            ;
+                                            break;
+                                        case OrderStatus.ChoGiaoHang:
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-truck"></i> Chờ giao hàng</span>
+                                            ;
+                                            break;
+                                        case OrderStatus.DaGiao:
+                                            <span class="badge bg-success"><i class="bi bi-check-circle"></i> Đã giao</span>
+                                            ;
+                                            break;
+                                        case OrderStatus.DaHuy:
+                                            <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Đã hủy</span>
+                                            ;
+                                            break;
+                                    }
+
+                                    <div class="mt-2 d-flex justify-content-center gap-2">
+                                        <!-- Xem chi tiết -->
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#orderDetailsModal"
+                                                data-order-id="@order.Id">
+                                            <i class="bi bi-eye"></i> Xem chi tiết
+                                        </button>
+
+                                        <!-- Hủy đơn -->
+                                        @if (order.OrderStatus == OrderStatus.ChoXacNhan)
+                                        {
+                                            <form asp-action="CancelOrder" asp-route-id="@order.Id" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                        onclick="return confirm('Bạn có chắc muốn hủy đơn hàng này không?');">
+                                                    <i class="bi bi-x-circle"></i> Hủy đơn
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal chi tiết đơn hàng -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-labelledby="orderDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="orderDetailsLabel">Chi tiết đơn hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="orderDetailsBody">
+                <div class="text-center text-muted">
+                    <i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i> Đang tải dữ liệu...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const detailsModal = document.getElementById('orderDetailsModal');
+    detailsModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+        const orderId = button.getAttribute('data-order-id');
+        const modalBody = document.getElementById('orderDetailsBody');
+
+        modalBody.innerHTML = `<div class="text-center text-muted py-4">
+            <i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i> Đang tải dữ liệu...
+        </div>`;
+
+        fetch(`/Orders/GetOrderDetails/${orderId}`)
+            .then(response => response.text())
+            .then(html => modalBody.innerHTML = html)
+            .catch(() => modalBody.innerHTML = '<p class="text-danger text-center">Không thể tải dữ liệu.</p>');
+    });
+</script>

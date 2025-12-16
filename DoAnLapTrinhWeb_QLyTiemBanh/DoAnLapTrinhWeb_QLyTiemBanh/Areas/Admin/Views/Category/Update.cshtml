@@ -1,0 +1,27 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Category
+
+@{
+    ViewData["Title"] = "Chỉnh sửa Loại Sản Phẩm";
+
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form asp-action="Update" method="post" class="needs-validation" novalidate>
+    <input type="hidden" asp-for="Id" />
+    <div class="mb-3">
+        <label asp-for="TenLoai" class="form-label"></label>
+        <input asp-for="TenLoai" class="form-control" required />
+        <span asp-validation-for="TenLoai" class="text-danger"></span>
+        <div class="invalid-feedback">Vui lòng nhập tên loại sản phẩm.</div>
+    </div>
+    <button type="submit" class="btn btn-success">Cập nhật</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

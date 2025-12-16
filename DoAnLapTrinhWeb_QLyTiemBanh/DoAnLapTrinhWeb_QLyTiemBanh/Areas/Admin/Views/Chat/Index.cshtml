@@ -1,0 +1,164 @@
+﻿@{
+    ViewData["Title"] = "Quản lý nhắn tin với người dùng";
+}
+<h2 class="mb-4">💬 Quản lý nhắn tin với người dùng</h2>
+
+<div class="row">
+    <!-- 🟢 Danh sách người dùng -->
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <strong>Danh sách người dùng</strong>
+                <span id="onlineCount" class="badge bg-light text-dark small">0 online</span>
+            </div>
+            <ul class="list-group list-group-flush" id="userList">
+                <li class="list-group-item text-muted text-center">Đang tải...</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 💬 Khung chat -->
+    <div class="col-md-9">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <strong id="chatTitle">Chưa chọn người dùng</strong>
+            </div>
+            <div id="chatBox" class="card-body"
+                 style="height:400px; overflow-y:auto; background-color:#fafafa;">
+            </div>
+            <div class="card-footer d-flex">
+                <input id="msgInput" type="text" class="form-control me-2" placeholder="Nhập tin nhắn..." />
+                <button id="sendBtn" class="btn btn-danger">
+                    <i class="bi bi-send"></i> Gửi
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script>
+        let selectedUser = null;
+        const userList = document.getElementById("userList");
+        const chatBox = document.getElementById("chatBox");
+        const chatTitle = document.getElementById("chatTitle");
+        const onlineCount = document.getElementById("onlineCount");
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub?userId=admin@tiembanh.local")
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        // Lấy danh sách người dùng
+        async function loadAllUsers() {
+            userList.innerHTML = "<li class='list-group-item text-center text-muted'>Đang tải...</li>";
+            const response = await fetch("/api/UserApi/all");
+            const users = await response.json();
+
+            userList.innerHTML = "";
+            users.forEach(u => {
+                const li = document.createElement("li");
+                li.className = "list-group-item d-flex justify-content-between align-items-center list-group-item-action";
+                li.textContent = u.fullName || u.email;
+
+                const badge = document.createElement("span");
+                badge.className = "badge bg-secondary";
+                badge.textContent = "offline";
+                badge.id = "badge-" + u.id;
+                li.appendChild(badge);
+
+                li.onclick = () => selectUser(u.id,u.fullName);
+                userList.appendChild(li);
+            });
+        }
+
+        // Cập nhật trạng thái online realtime
+        connection.on("OnlineUsersUpdated", (users) => {
+            onlineCount.textContent = `${users.length} online`;
+
+            document.querySelectorAll("[id^='badge-']").forEach(b => {
+                b.textContent = "offline";
+                b.className = "badge bg-secondary";
+            });
+
+            users.forEach(email => {
+                const badge = document.getElementById("badge-" + email);
+                if (badge) {
+                    badge.textContent = "online";
+                    badge.className = "badge bg-success";
+                }
+            });
+        });
+
+        // Nhận tin nhắn mới từ user
+        connection.on("ReceiveMessage", (from, message) => {
+            if (from === selectedUser) {
+                appendMessage(from, message, false);
+            } else {
+                console.log(`📩 Tin nhắn mới từ ${from}: ${message}`);
+            }
+        });
+
+        // Khi chọn user → load lịch sử từ API
+                async function selectUser(userId,userName) {
+            selectedUser = userId;
+            chatTitle.textContent = "Chat với " +userName +" (" + userId + ")";
+            chatBox.innerHTML = "<div class='text-muted'>💬 Đang tải lịch sử trò chuyện...</div>";
+
+            try {
+                // GỌI API ĐỂ LẤY LỊCH SỬ
+                const response = await fetch(`/api/ChatApi/history?userId=${encodeURIComponent(userId)}`);
+                const messages = await response.json();
+
+                chatBox.innerHTML = "";
+                if (messages.length === 0) {
+                    chatBox.innerHTML = "<div class='text-muted'>💬 Chưa có tin nhắn nào với người dùng này.</div>";
+                    return;
+                }
+
+                messages.forEach(m => {
+                    const align = m.isFromAdmin ? "text-end text-primary" : "";
+                    const label = m.isFromAdmin ? "Bạn" : m.from;
+                    chatBox.innerHTML += `<div class="${align}"><b>${label}:</b> ${m.text}</div>`;
+                });
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } catch (err) {
+                console.error("❌ Lỗi tải lịch sử:", err);
+                chatBox.innerHTML = "<div class='text-danger'>Không thể tải lịch sử trò chuyện.</div>";
+            }
+        }
+
+
+        // Hàm hiển thị tin nhắn
+        function appendMessage(from, text, isFromAdmin) {
+            const align = isFromAdmin ? "text-end text-primary" : "";
+            const label = isFromAdmin ? "Bạn" : from;
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `${align} mb-1`;
+            msgDiv.innerHTML = `<b>${label}:</b> ${text}`;
+            chatBox.appendChild(msgDiv);
+        }
+
+        // 📨 Gửi tin nhắn
+        document.getElementById("sendBtn").addEventListener("click", () => {
+            const msg = document.getElementById("msgInput").value.trim();
+            if (!msg || !selectedUser) return;
+
+            connection.invoke("SendMessageToUser", selectedUser, msg);
+            appendMessage("Bạn", msg, true);
+
+            document.getElementById("msgInput").value = "";
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // 🚀 Khi kết nối xong
+        connection.start().then(() => {
+            console.log(" Admin connected to ChatHub");
+            loadAllUsers();
+        }).catch(err => console.error(err));
+
+    </script>
+}
+

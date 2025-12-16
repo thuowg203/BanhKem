@@ -1,0 +1,59 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.UserCart
+
+@{
+    ViewData["Title"] = "Chi tiết giỏ hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container mt-4">
+    <div class="card card-custom">
+        <div class="card-header">
+			🧾 Giỏ hàng của @Model.ApplicationUser?.Email
+        </div>
+        <div class="card-body">
+            @if (Model.CartItems == null || !Model.CartItems.Any())
+            {
+                <div class="alert alert-warning text-center">
+                    Giỏ hàng trống.
+                </div>
+            }
+            else
+            {
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Giá (VNĐ)</th>
+                            <th>Thành tiền (VNĐ)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model.CartItems)
+                        {
+                            <tr>
+                                <td>@item.Product?.Name</td>
+                                <td>@item.Quantity</td>
+                                <td>@String.Format("{0:N0}", item.Product?.Price)</td>
+                                <td>@String.Format("{0:N0}", item.Quantity * (item.Product?.Price ?? 0))</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="text-end mt-3">
+                    <strong>
+                        Tổng cộng:
+                        @String.Format("{0:N0} ₫", Model.CartItems.Sum(i => i.Quantity * (i.Product?.Price ?? 0)))
+                    </strong>
+                </div>
+            }
+
+            <div class="text-start mt-3">
+                <a asp-area="Admin" asp-controller="Cart" asp-action="UserCarts" class="btn btn-secondary">
+                    ← Quay lại danh sách
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

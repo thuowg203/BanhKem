@@ -1,0 +1,82 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Order
+
+
+@{
+    ViewData["Title"] = "Order Comfirmation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5 mb-5">
+    <div class="d-flex justify-content-center align-items-center" style="min-height:60vh;">
+        <div class="card shadow-sm w-100" style="max-width:700px;">
+            <div class="card-body text-center py-5">
+                <svg width="64" height="64" fill="none" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="12" fill="#e0f7e9" />
+                    <path d="M7 13l3 3 7-7" stroke="#34c759" stroke-width="2"
+                          fill="none" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+
+                <h2 class="mt-4 mb-2 text-success fw-bold">
+                    Đặt hàng thành công!
+                </h2>
+
+                <p class="text-muted mb-4">
+                    Cảm ơn bạn <strong>@Model.RecipientName</strong> đã đặt hàng tại <strong>Tiệm Bánh</strong>!<br />
+                    Mã đơn hàng của bạn là <strong>#@Model.Id</strong>.
+                </p>
+
+                <div class="alert alert-light border shadow-sm text-start" style="max-width:600px; margin:auto;">
+                    <p><strong>📞 Số điện thoại:</strong> @Model.RecipientPhone</p>
+                    <p><strong>📦 Địa chỉ giao hàng:</strong><br />@Model.SpecificAddress, @Model.Ward, @Model.District</p>
+                    <p><strong>🕒 Ngày nhận hàng dự kiến:</strong> @Model.DeliveryDateTime.ToString("dd/MM/yyyy HH:mm")</p>
+                    <p><strong>💳 Hình thức thanh toán:</strong> @Model.PaymentMethod</p>
+                    <p>
+                        <strong>💰 Trạng thái thanh toán:</strong>
+                        <span class="fw-semibold @(Model.PaymentStatus == "Đã thanh toán" ? "text-success" : "text-danger")">
+                            @Model.PaymentStatus
+                        </span>
+                    </p>
+                </div>
+
+                <h5 class="mt-5 mb-3 fw-bold">Chi tiết đơn hàng</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tên sản phẩm</th>
+                                <th>Số lượng</th>
+                                <th>Đơn giá</th>
+                                <th>Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.OrderDetails)
+                            {
+                                <tr>
+                                    <td>@item.Product?.Name</td>
+                                    <td>@item.Quantity</td>
+                                    <td>@(item.Price.ToString("N0")) đ</td>
+                                    <td>@((item.Price * item.Quantity).ToString("N0")) đ</td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-4">
+                    <h4>
+                        Tổng cộng:
+                        <span class="text-danger fw-bold">@Model.TotalPrice.ToString("N0") đ</span>
+                    </h4>
+                </div>
+
+                <div class="mt-5">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary px-5 py-2 rounded-pill">
+                        Quay về trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

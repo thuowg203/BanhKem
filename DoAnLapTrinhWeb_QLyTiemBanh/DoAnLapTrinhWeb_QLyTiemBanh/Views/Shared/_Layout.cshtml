@@ -1,0 +1,154 @@
+﻿<!DOCTYPE html>
+<html lang="vn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản Lý Tiệm Bánh</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/QLTiemBanh.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="QLTiemBanh Logo" style="width: 80px;" />
+
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Cửa hàng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="ComboGift">Combo Gift</a>
+                        </li>
+                        @* <li class="nav-item"> *@
+                        @*     <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Đặt hàng trước</a> *@
+                        @* </li> *@
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Liên hệ</a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Orders" asp-action="History">
+                                    <i class="bi bi-clock-history me-1"></i> Lịch sử mua hàng
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    
+                    <div class="d-flex align-items-center gap-3 ms-auto">
+                        <a asp-controller="ShoppingCart" asp-action="Index" class="text-dark fs-5 position-relative" title="Giỏ hàng">
+                            <i class="bi bi-cart"></i>
+                        </a>
+                        <partial name="_LoginPartial" />
+                    </div>
+                </div>
+
+            </div>
+        </nav>
+    </header>
+    @* <div class="container-fluid"> *@
+    @*     <main role="main" class="pb-3"> *@
+    @*         @RenderBody() *@
+    @*     </main> *@
+    @* </div> *@
+    <main role="main" class="container-fluid pb-3">
+        <!-- Hoặc container-fluid -->
+        @RenderBody()
+    </main>
+    <footer class=" site-footer-custom">
+        <div class="container">
+            <div class="row">
+                <!-- Cột 1: Về Bakes -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h5 class="footer-title">VỀ BAKES</h5>
+                    <p class="footer-text">
+                        Một tiệm bánh ngọt Pháp. Bakes tin rằng bánh ngọt nên giống như tình yêu: thú vị, chu đáo và trung thực.
+                    </p>
+                    <p class="footer-text">
+                        Còn lại chỉ là bao bì.
+                    </p>
+                </div>
+
+                <!-- Cột 2: Dịch vụ khách hàng -->
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h5 class="footer-title">DỊCH VỤ KHÁCH HÀNG</h5>
+                    <p class="footer-text">
+                        Hotline: +84 902 77 42 44<br>
+                        Đối tác thương hiệu: +84 909 55 88 49<br>
+                        (Thứ 2 - Thứ 6, 09:00 - 18:00)<br>
+                        Email: <a href="mailto:team@bakes.com" class="footer-link">team@bakes.com</a>
+                    </p>
+                </div>
+
+                <!-- Cột 3: Đến thăm Bakes -->
+                <div class="col-lg-6 col-md-12">
+                    <h5 class="footer-title">ĐẾN THĂM BAKES</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <div class="location-block mb-3">
+                                <strong class="location-name d-block">Bakes Thảo Điền</strong>
+                                <p class="footer-text mb-0">
+                                    Tiệm Bánh Mặn, Ngọt, Bistro và Bar<br>
+                                    16 Thảo Điền, Quận 2, TP.HCM
+                                </p>
+                            </div>
+
+                            <div class="location-block mb-3">
+                                <strong class="location-name d-block">Bakes Hồ Con Rùa</strong>
+                                <p class="footer-text mb-0">
+                                    Tiệm Bánh Mặn và Ngọt<br>
+                                    47 Trần Cao Vân, Quận 3, TP.HCM
+                                </p>
+                            </div>
+                            <div class="location-block">
+                                <strong class="location-name d-block">Bakes Pasteur</strong>
+                                <p class="footer-text mb-0">
+                                    Tiệm Bánh Mặn và Ngọt<br>
+                                    244 Pasteur, Quận 3, TP.HCM
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="location-block mb-3">
+                                <strong class="location-name d-block">Bakes Vincom Grand Park</strong>
+                                <p class="footer-text mb-0">
+                                    Tiệm Bánh Mặn và Ngọt<br>
+                                    L1-20, Tòa nhà Vincom Mega Mall Grand Park<br>
+                                    Thành Phố Thủ Đức, TP.HCM
+                                </p>
+                            </div>
+
+                            <div class="location-block">
+                                <strong class="location-name d-block">Bakes Phú Mỹ Hưng</strong>
+                                <p class="footer-text mb-0">
+                                    Tiệm Bánh Mặn và Ngọt<br>
+                                    169 Nguyễn Đức Cảnh, Quận 7, TP.HCM
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

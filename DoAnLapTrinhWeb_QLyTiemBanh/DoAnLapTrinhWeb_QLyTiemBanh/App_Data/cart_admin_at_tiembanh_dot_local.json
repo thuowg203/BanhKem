@@ -1,0 +1,16 @@
+[
+  {
+    "ProductId": 1,
+    "Name": "B\u00E1nh Mousse B\u01A1 T\u01B0\u01A1i",
+    "Quantity": 2,
+    "Price": 400000,
+    "ImageUrl": "/images/06ad69fe-2786-42a1-93e8-dc6f3766dd2d.png"
+  },
+  {
+    "ProductId": 4,
+    "Name": "xyz",
+    "Quantity": 1,
+    "Price": 119,
+    "ImageUrl": "/images/58e24511-c472-4794-86ac-47ecfc8c5b01.png"
+  }
+]

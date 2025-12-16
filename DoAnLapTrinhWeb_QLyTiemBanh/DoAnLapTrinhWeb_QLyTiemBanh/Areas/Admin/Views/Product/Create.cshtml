@@ -1,0 +1,159 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Product
+
+@{
+    ViewData["Title"] = "Thêm Sản Phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    :root {
+        --main-color: #FF8A80;
+        --main-color-dark: #e57373;
+        --background-light: #fff8f7;
+    }
+
+    body {
+        background-color: var(--background-light);
+    }
+
+    .card-custom {
+        border: 1px solid #ffd6d3;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(255, 138, 128, 0.1);
+    }
+
+    .card-header {
+        background-color: var(--main-color);
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 500;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background-color: var(--main-color);
+        border-color: var(--main-color);
+    }
+
+        .btn-primary:hover {
+            background-color: var(--main-color-dark);
+            border-color: var(--main-color-dark);
+        }
+
+    label {
+        font-weight: 500;
+        color: #555;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-custom">
+                <div class="card-header">
+                    @ViewData["Title"]
+                </div>
+                <div class="card-body">
+                    <form asp-area="Admin" asp-controller="Product" asp-action="Create"
+                          method="post" enctype="multipart/form-data"
+                          class="needs-validation" novalidate>
+
+                        <!-- Tên sản phẩm -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">Tên sản phẩm</label>
+                            <input asp-for="Name" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập tên sản phẩm.</div>
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <!-- Loại sản phẩm -->
+                        <div class="mb-3">
+                            <label asp-for="CategoryId" class="form-label">Loại Sản Phẩm</label>
+                            @{
+                                var categories = ViewBag.Categories as IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.Category>;
+                                var selectList = new SelectList(categories, "Id", "TenLoai");
+                            }
+                            <select asp-for="CategoryId" class="form-select" asp-items="selectList" required>
+                                <option value="">-- Chọn loại --</option>
+                            </select>
+                            <div class="invalid-feedback">Vui lòng chọn loại sản phẩm.</div>
+                            <span asp-validation-for="CategoryId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label">Mô tả</label>
+                            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Giá -->
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label">Giá</label>
+                            <input asp-for="Price" type="number" step="0.001" min="0" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập giá hợp lệ.</div>
+                            <span asp-validation-for="Price" class="text-danger"></span>
+                        </div>
+
+                        <!-- Số lượng -->
+                        <div class="mb-3">
+                            <label asp-for="Quantity" class="form-label">Số lượng</label>
+                            <input asp-for="Quantity" type="number" min="0" class="form-control" required />
+                            <div class="invalid-feedback">Vui lòng nhập số lượng hợp lệ.</div>
+                            <span asp-validation-for="Quantity" class="text-danger"></span>
+                        </div>
+
+                        <!-- Nhãn sản phẩm -->
+                        <div class="mb-3">
+                            <label asp-for="Badge" class="form-label">Nhãn sản phẩm</label>
+                            <select asp-for="Badge" class="form-select">
+                                <option value="">-- Chọn nhãn --</option>
+                                <option value="NEW IN">NEW IN</option>
+                                <option value="SIGNATURE">SIGNATURE</option>
+                                <option value="RE-RELEASE">RE-RELEASE</option>
+                            </select>
+                            <span asp-validation-for="Badge" class="text-danger"></span>
+                        </div>
+
+                        <!-- Hình ảnh -->
+                        <div class="mb-3">
+                            <label asp-for="Image" class="form-label">URL Hình Ảnh</label>
+                            <input type="file" name="ImageFile" class="form-control" />
+                            <span asp-validation-for="Image" class="text-danger"></span>
+                        </div>
+
+                        <!-- Nút -->
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">Lưu</button>
+                            <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Bootstrap validation
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms)
+                .forEach(function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+        })();
+    </script>
+
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

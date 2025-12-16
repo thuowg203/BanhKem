@@ -1,0 +1,156 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] - Quản Lý Tiệm Bánh (Admin)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* Ví dụ CSS nhanh cho sidebar */
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wrapper {
+            display: flex;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
+
+        nav.sidebar {
+            width: 250px;
+            background-color: #FF8A80;
+            color: white;
+            padding-top: 1rem;
+            flex-shrink: 0;
+        }
+
+            nav.sidebar a {
+                color: white;
+                text-decoration: none;
+                display: block;
+                padding: 0.75rem 1.25rem;
+                font-weight: 500;
+                transition: background-color 0.2s;
+            }
+
+                nav.sidebar a:hover, nav.sidebar a.active {
+                    background-color: #e57373;
+                }
+
+        main.content-area {
+            flex-grow: 1;
+            padding: 1.5rem;
+            background-color: #f8f9fa;
+            overflow-y: auto;
+        }
+
+        header.admin-header {
+            height: 56px;
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            padding: 0 1.5rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #FF8A80;
+            box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
+        }
+
+        footer.admin-footer {
+            background-color: #fff;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <header class="">
+            <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+                <div class="container-fluid">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="~/images/logo.png" alt="QLTiemBanh Logo" style="width: 80px;" />
+
+                    </a>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                            aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                        <ul class="navbar-nav flex-grow-1">
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Giới thiệu</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Product" asp-action="Index">Cửa hàng</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Liên hệ</a>
+                            </li>
+                        </ul>
+                        <div class="d-flex align-items-center gap-3 ms-auto">
+                            <a href="#" class="text-dark fs-5 text-decoration-none" title="Tìm kiếm">
+                                <i class="bi bi-search"></i>
+                            </a>
+
+                        </div>
+                        <partial name="_LoginPartial" />
+                    </div>
+
+                </div>
+            </nav>
+    </header>
+
+    <div class="wrapper">
+        <nav class="sidebar">
+            <a asp-area="Admin" asp-controller="Home" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Home" ? "active" : "")">
+                <i class="bi bi-house-door-fill"></i> Dashboard
+            </a>
+            <a asp-area="Admin" asp-controller="Product" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Product" ? "active" : "")">
+                <i class="bi bi-box-seam"></i> Quản lý sản phẩm
+            </a>
+            <a asp-area="Admin" asp-controller="Category" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Category" ? "active" : "")">
+                <i class="bi bi-tags-fill"></i> Quản lý danh mục
+            </a>
+            <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Orders" ? "active" : "")">
+                <i class="bi bi-basket3-fill"></i> Quản lý đơn hàng
+            </a>
+            <a asp-area="Admin" asp-controller="User" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "User" ? "active" : "")">
+                <i class="bi bi-people-fill"></i> Quản lý người dùng
+            </a>
+            <a asp-area="Admin" asp-controller="Cart" asp-action="UserCarts" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Cart" ? "active" : "")">
+                <i class="bi bi-people-fill"></i> Quản lý giỏ hàng người dùng
+            </a>
+            <a asp-area="Admin" asp-controller="Chat" asp-action="Index" class="@(ViewContext.RouteData.Values["controller"].ToString() == "Chat" ? "active" : "")">
+                <i class="bi bi-people-fill"></i> Quản lý nhắn tin với người dùng
+            </a>
+            <a asp-area="" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-box-arrow-left"></i> Về trang chính
+            </a>
+        </nav>
+
+        <main class="content-area">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="admin-footer">
+        &copy; 2025 Quản Lý Tiệm Bánh. Bản quyền thuộc về nhóm phát triển.
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

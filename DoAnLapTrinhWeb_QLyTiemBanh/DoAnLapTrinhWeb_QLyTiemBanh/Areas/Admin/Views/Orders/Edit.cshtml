@@ -1,0 +1,11 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Order
+@using DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums
+
+<form asp-action="Edit" method="post">
+    <div class="mb-3">
+        <label class="form-label fw-bold">Trạng thái đơn hàng</label>
+        <select asp-for="OrderStatus" class="form-select" asp-items="Html.GetEnumSelectList<OrderStatus>()"></select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+</form>

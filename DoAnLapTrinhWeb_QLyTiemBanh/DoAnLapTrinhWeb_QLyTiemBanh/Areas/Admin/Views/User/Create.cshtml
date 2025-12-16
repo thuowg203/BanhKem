@@ -1,0 +1,46 @@
+﻿ @model DoAnLapTrinhWeb_QLyTiemBanh.Areas.Admin.Controllers.CreateUserViewModel
+
+@{
+    ViewData["Title"] = "Tạo người dùng mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml"; // Đảm bảo layout chính xác
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: #FF8A80; font-weight: 600;">Tạo người dùng mới</h2>
+
+    <form asp-action="Create" method="post" class="mt-4">
+        <!-- Trường Họ tên -->
+        <div class="form-group mb-4">
+            <label for="FullName" class="form-label">Họ tên</label>
+            <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên" />
+            <span asp-validation-for="FullName" class="text-danger"></span>
+        </div>
+
+        <!-- Trường Email -->
+        <div class="form-group mb-4">
+            <label for="Email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" placeholder="Nhập email" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <!-- Trường Số điện thoại -->
+        <div class="form-group mb-4">
+            <label for="PhoneNumber" class="form-label">Số điện thoại</label>
+            <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label for="Password" class="form-label">Mật khẩu</label>
+            <input asp-for="Password" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+        <!-- Nút tạo người dùng -->
+        <div class="d-flex justify-content-between mb-4">
+            <button type="submit" class="btn btn-success px-4">Tạo người dùng</button>
+
+            <!-- Nút hủy bỏ -->
+            <a href="@Url.Action("Index", "User")" class="btn btn-danger px-4">Hủy bỏ</a>
+        </div>
+    </form>
+</div>

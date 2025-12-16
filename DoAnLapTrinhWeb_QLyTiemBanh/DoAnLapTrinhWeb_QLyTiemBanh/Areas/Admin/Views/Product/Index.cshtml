@@ -1,0 +1,94 @@
+﻿@model IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.Product>
+
+@{
+    ViewData["Title"] = "Danh sách sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="container">
+    <h1 class="text-center" style="color: #FF8A80;">@ViewData["Title"]</h1>
+    <style>
+        .btn-custom {
+            background-color: #FF8A80;
+            color: white;
+            border: none;
+        }
+
+            .btn-custom:hover {
+                background-color: #e67375; /* màu đậm hơn khi hover */
+                color: white;
+            }
+    </style>
+    <p class="text-end">
+        <a asp-area="Admin" asp-controller="Product" asp-action="Create" class="btn btn-custom">Thêm sản phẩm mới</a>
+    </p>
+
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 product-grid">
+        @foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="product-card">
+                    <div class="product-image-wrapper">
+                        <a href="@Url.Action("Details", "Product", new { id = item.Id })">
+                            <img src="@item.Image"
+                                 alt="@item.Name"
+                                 class="img-fluid" />
+                        </a>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">
+                            <a href="@Url.Action("Details", "Product", new { id = item.Id })">
+                                @item.Name
+                            </a>
+                        </h3>
+                        <p class="product-price">
+                            @string.Format("{0:#,##0} ₫", item.Price)
+                        </p>
+                        <div class="product-actions mt-3 d-flex justify-content-center gap-3">
+                            <a asp-area="Admin" asp-controller="Product" asp-action="Update" asp-route-id="@item.Id" class="btn btn-sm btn-edit">
+                                <i class="bi bi-pencil-square"></i> Sửa
+                            </a>
+                            <a asp-area="Admin" asp-controller="Product" asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-delete"
+                               onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này không?');">
+                                <i class="bi bi-trash"></i> Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+
+    </div>
+</div>
+<style>
+    .btn-edit {
+        background-color: #FF8A80;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-edit:hover {
+            background-color: #e57373;
+            color: white;
+        }
+
+    .btn-delete {
+        background-color: #ff6b6b;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-delete:hover {
+            background-color: #d9534f;
+            color: white;
+        }
+
+    .product-actions i {
+        margin-right: 6px;
+        vertical-align: middle;
+    }
+
+</style>

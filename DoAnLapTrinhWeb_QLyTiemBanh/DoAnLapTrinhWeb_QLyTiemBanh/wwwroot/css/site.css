@@ -1,0 +1,267 @@
+﻿html {
+    font-size: 14px;
+}
+
+@media (min-width: 768px) {
+    html {
+        font-size: 16px;
+    }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+.container-fluid {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.main-banner-section {
+    position: relative;
+    width: 100%;
+    height: 75vh; /* Chiều cao banner, ví dụ 75% chiều cao màn hình. Điều chỉnh nếu cần. */
+    overflow: hidden;
+    background-color: #332211; /* Màu nền dự phòng */
+}
+
+.main-banner-background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    z-index: 1;
+}
+
+.main-banner-color-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Lớp phủ màu xanh lá cây đậm, hơi trong suốt (theo màu thanh dưới trong ảnh gốc) */
+    background-color: rgba(36, 63, 48, 0.1); /* Điều chỉnh màu (36,63,48) và độ trong suốt (0) */
+    z-index: 2;
+}
+
+.banner-button-container {
+    position: absolute;
+    top: 95%; /* Căn giữa theo chiều dọc */
+    left: 25%; /* Căn giữa theo chiều ngang */
+    transform: translate(-50%, -50%); /* Kỹ thuật căn giữa tuyệt đối */
+    z-index: 3; /* Nằm trên lớp phủ màu */
+    text-align: center; /* Đảm bảo nút được căn giữa nếu nó là inline-block */
+}
+
+.new-item-promo-button { /* Đây là nút "BÁNH SINH NHẬT MỚI!" */
+    display: inline-block;
+    background-color: #6488B0;
+    color: #FFFFFF;
+    padding: 12px 30px; /* Tăng padding một chút cho nổi bật hơn */
+    text-decoration: none;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 0.9rem; /* Khoảng 14-15px */
+    font-weight: bold;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 3px;
+    letter-spacing: 0.05em;
+    transition: background-color 0.2s ease-in-out;
+    /* Thêm box-shadow nhẹ để nút nổi hơn trên nền tối (tùy chọn) */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+    .new-item-promo-button:hover {
+        background-color: #527193;
+    }
+
+.home__subtitle {
+    font-family: -apple-system, serif;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #FF8A80;
+    text-align: center;
+    padding-bottom: 20px;
+    padding-top: 36px;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+    .home__subtitle::after {
+        content: "";
+        margin: auto;
+        width: 30px;
+        height: 3px;
+        position: absolute;
+        bottom: 0;
+        background: #FF8A80;
+        opacity: .2;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+.product-name {
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Ubuntu, Helvetica Neue, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 14px;
+    margin: 8px 0 2px;
+    word-break: break-word;
+    letter-spacing: 0;
+}
+
+    .product-name a {
+        color: #FF8A80;
+        text-decoration: none;
+    }
+
+        .product-name a:hover {
+            color: #D2691E; /* Màu khi hover */
+            text-decoration: underline; /* Tùy chọn */
+        }
+
+.product-price {
+    color: #AF2D15;
+    text-align: center;
+}
+
+.product-image-wrapper {
+    position: relative;
+}
+
+.product-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(36, 63, 48, 0.1);
+    color: white;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.product-card {
+    border: 1px solid #ddd; /* ví dụ border */
+    border-radius: 0.25rem; /* tương ứng class rounded */
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075); /* tương ứng shadow-sm */
+    padding: 1rem; /* tương ứng p-3 */
+    height: 100%; /* tương ứng h-100 */
+    display: flex; /* tương ứng d-flex */
+    flex-direction: column; /* tương ứng flex-column */
+}
+.product-name a {
+    display: block; /* hoặc inline-block */
+    white-space: nowrap; /* không xuống dòng */
+    overflow: hidden; /* ẩn phần thừa */
+    text-overflow: ellipsis; /* hiện dấu 3 chấm */
+    max-width: 100%; /* giới hạn chiều rộng */
+}
+
+
+.section-title {
+    font-family: -apple-system, serif;
+    font-style: normal;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #FF8A80;
+    text-align: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.section-text {
+    font-family: -apple-system, serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    color: #AF2D15;
+    text-align: center;
+}
+
+.site-footer-custom {
+    background-color: #F8F5F0;
+    color: #383838;
+    font-size: 0.875rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    border-top: 1px solid #EAEAEA;
+}
+
+    .site-footer-custom .footer-title { /* Nhắm mục tiêu cụ thể hơn */
+        text-transform: uppercase;
+        font-weight: 600; /* Hoặc 'bold' */
+        margin-bottom: 1rem; /* Khoảng cách dưới tiêu đề cột */
+        font-size: 0.9rem;
+        color: #212529; /* Màu cho tiêu đề cột, có thể đậm hơn chút */
+    }
+
+    .site-footer-custom .footer-text {
+        line-height: 1.7;
+        margin-bottom: 0.75rem;
+    }
+
+        .site-footer-custom .footer-text.mb-0 { /* Class tiện ích của Bootstrap */
+            margin-bottom: 0 !important;
+        }
+
+    .site-footer-custom .footer-link {
+        color: #383838; /* Màu link giống màu text */
+        text-decoration: none;
+        font-weight: 500; /* Hơi đậm hơn text thường */
+    }
+
+        .site-footer-custom .footer-link:hover {
+            color: #D32F2F; /* Màu đỏ cam khi hover, hoặc màu bạn muốn */
+            text-decoration: underline;
+        }
+
+    .site-footer-custom .location-block {
+        /* Không cần CSS đặc biệt ở đây nếu mb-3 là đủ */
+    }
+
+        .site-footer-custom .location-block strong.location-name {
+            font-weight: bold; /* Hoặc 600 */
+            color: #212529; /* Màu cho tên địa điểm */
+            margin-bottom: 0.25rem; /* Khoảng cách nhỏ giữa tên và địa chỉ */
+            /* d-block đã được thêm trực tiếp trong HTML, không cần CSS riêng */
+        }
+
+    /* Đảm bảo container bên trong footer chiếm đủ không gian */
+    .site-footer-custom .container {
+        max-width: 1140px; /* Hoặc giá trị phù hợp với .container của bạn */
+        margin-left: auto;
+        margin-right: auto;
+    }

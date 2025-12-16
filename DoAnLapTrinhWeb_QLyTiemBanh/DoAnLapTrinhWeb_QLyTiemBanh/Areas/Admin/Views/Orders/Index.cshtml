@@ -1,0 +1,399 @@
+﻿@model IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.Order>
+@{
+    ViewData["Title"] = "Quản lý Đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    var today = DateTime.Today;
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+
+<!-- Style nổi bật các dòng quan trọng và các nút filter -->
+<style>
+    h2{
+        color: #FF8A80;
+    }
+    .table-hover tbody tr.delivery-urgent {
+        background-color: #fff3cd !important; /* Màu vàng nhạt */
+    }
+
+    .table-hover tbody tr.delivery-overdue {
+        background-color: #f8d7da !important; /* Màu đỏ nhạt */
+    }
+
+    .table-hover tbody tr.delivery-urgent:hover {
+        background-color: #ffe8a1 !important;
+    }
+
+    .table-hover tbody tr.delivery-overdue:hover {
+        background-color: #f5c6cb !important;
+    }
+
+    .btn-filter-tatca-selected {
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .btn-filter-tatca-default {
+        background-color: transparent;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+    .btn-filter-today-selected {
+        background-color: #ffc107;
+        color: black;
+        border-color: #ffc107;
+    }
+
+    .btn-filter-today-default {
+        background-color: transparent;
+        color: #ffc107;
+        border: 1px solid #ffc107;
+    }
+
+    .btn-filter-pending-selected {
+        background-color: #0dcaf0;
+        color: white;
+        border-color: #0dcaf0;
+    }
+
+    .btn-filter-pending-default {
+        background-color: transparent;
+        color: #0dcaf0;
+        border: 1px solid #0dcaf0;
+    }
+
+    .btn-filter-overdue-selected {
+        background-color: #dc3545;
+        color: white;
+        border-color: #dc3545;
+    }
+
+    .btn-filter-overdue-default {
+        background-color: transparent;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+    }
+
+    .btn-filter-urgent-selected {
+        background-color: #fd7e14;
+        color: white;
+        border-color: #fd7e14;
+    }
+
+    .btn-filter-urgent-default {
+        background-color: transparent;
+        color: #fd7e14;
+        border: 1px solid #fd7e14;
+    }
+
+    .datatable-header {
+        margin-bottom: 1rem; /* hoặc dùng 1.5rem nếu muốn thoáng hơn */
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6; /* optional: ngăn cách nhẹ */
+    }
+
+    .dataTables_filter,
+    .dataTables_length {
+        padding-top: 0.5rem;
+    }
+
+    .dataTables_filter {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.5rem;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+        .dataTables_filter label {
+            margin-bottom: 0;
+        }
+
+        .dataTables_filter input[type="search"] {
+            width: 250px;
+            padding: 6px 12px;
+            border-radius: 0.375rem;
+            border: 1px solid #ced4da;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+            .dataTables_filter input[type="search"]:focus {
+                outline: none;
+                border-color: #0d6efd;
+                box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            }
+
+
+
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📦 Quản lý đơn hàng</h2>
+        <a asp-area="Admin" asp-controller="Orders" asp-action="Create" class="btn btn-primary shadow-sm">
+            <i class="bi bi-plus-circle-fill me-2"></i>Tạo đơn hàng mới
+        </a>
+    </div>
+
+    <!-- Thanh bộ lọc -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body d-flex flex-wrap gap-2">
+            <a asp-action="Index" class="btn btn-sm @(ViewBag.Filter == null ? "btn-filter-tatca-selected" : "btn-filter-tatca-default")">Tất cả</a>
+            <a asp-action="Index" asp-route-filter="today" class="btn btn-sm @(ViewBag.Filter == "today" ? "btn-filter-today-selected" : "btn-filter-today-default")">Giao hôm nay</a>
+            <a asp-action="Index" asp-route-filter="pending" class="btn btn-sm @(ViewBag.Filter == "pending" ? "btn-filter-pending-selected" : "btn-filter-pending-default")">Chưa giao</a>
+            <a asp-action="Index" asp-route-filter="overdue" class="btn btn-sm @(ViewBag.Filter == "overdue" ? "btn-filter-overdue-selected" : "btn-filter-overdue-default")">Đã trễ hẹn</a>
+            <a asp-action="Index" asp-route-filter="urgent" class="btn btn-sm @(ViewBag.Filter == "urgent" ? "btn-filter-urgent-selected" : "btn-filter-urgent-default")">Sắp giao</a>
+            <a asp-action="Index" asp-route-filter="unconfirmed" class="btn btn-sm @(ViewBag.Filter == "unconfirmed" ? "btn-dark text-white" : "btn-outline-dark")"> Chưa xác nhận</a>
+            <a asp-action="Index" asp-route-filter="completed" class="btn btn-sm @(ViewBag.Filter == "completed" ? "btn-success text-white" : "btn-outline-success")">Đã giao</a>
+            <a asp-action="Index" asp-route-filter="cancelled" class="btn btn-sm @(ViewBag.Filter == "cancelled" ? "btn-danger text-white" : "btn-outline-danger")">Đã hủy</a>
+
+
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table id="ordersTable" class="table table-hover table-bordered align-middle text-center mb-0" style="width:100%">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col" style="width: 5%;">Mã ĐH</th>
+                            <th scope="col" style="width: 15%;">Khách hàng</th>
+                            <th scope="col" style="width: 20%;">Người nhận</th>
+                            <th scope="col" style="width: 15%;">Thời gian giao</th>
+                            <th scope="col" style="width: 15%;">Tổng tiền</th>
+                            <th scope="col" style="width: 15%;">Thanh toán</th>
+                            <th scope="col" style="width: 20%;">Trạng thái</th>
+                            <th scope="col" style="width: 25%;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center p-5 text-muted">
+                                    <i class="bi bi-box2-heart fs-1"></i>
+                                    <p class="mt-2 mb-0">Không có đơn hàng nào phù hợp.</p>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var order in Model)
+                            {
+                                string rowClass = "";
+                                if (!order.IsDelivered && order.DeliveryDateTime > DateTime.MinValue)
+                                {
+                                    var now = DateTime.Now;
+                                    var timeToDelivery = order.DeliveryDateTime - now;
+
+                                    if (timeToDelivery.TotalMinutes <= 60 && timeToDelivery.TotalMinutes > 0)
+                                    {
+                                        rowClass = "delivery-urgent";
+                                    }
+                                    else if (timeToDelivery.TotalMinutes <= 0)
+                                    {
+                                        rowClass = "delivery-overdue";
+                                    }
+                                }
+                                <tr class="@rowClass">
+                                    <td class="fw-bold">#@order.Id</td>
+                                    <td>
+                                        @order.ApplicationUser.FullName <br />
+                                        <small class="text-muted">@order.ApplicationUser.Email</small>
+                                    </td>
+                                    <td>
+                                        <div>@order.RecipientName</div>
+                                        <small class="text-muted">@order.RecipientPhone</small>
+                                    </td>
+                                    <td>
+                                        @if (order.DeliveryDateTime > DateTime.MinValue)
+                                        {
+                                            <div class="fw-bold">@order.DeliveryDateTime.ToString("dd/MM/yyyy")</div>
+                                            <small class="text-primary">@order.DeliveryDateTime.ToString("HH:mm")</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Không có</span>
+                                        }
+                                    </td>
+                                    <td class="fw-bold text-danger">@order.TotalPrice.ToString("N0") đ</td>
+                                    <td>
+                                        @if (order.PaymentStatus == "Paid")
+                                        {
+                                            <span class="badge bg-success">Đã thanh toán</span>
+                                        }
+                                        else if (order.PaymentStatus == "Pending")
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                                        }
+                                        @if (order.PaymentStatus == "Đã thanh toán")
+                                        {
+                                            <span class="badge bg-success">Đã thanh toán</span>
+                                        }
+                                        else if (order.PaymentStatus == "Chờ thanh toán")
+                                        {
+                                            <span class="badge bg-warning text-dark">Chờ thanh toán</span>
+                                        }
+                                        else if (order.PaymentStatus == "Unpaid")
+                                        {
+                                            <span class="badge bg-danger">Chưa thanh toán</span>
+                                        }
+                                        else if (order.PaymentStatus == "Chưa thanh toán")
+                                        {
+                                            <span class="badge bg-danger">Chưa thanh toán</span>
+                                        }
+                                        
+                                    </td>
+
+                                    @* <td> *@
+                                        @* <span class="badge rounded-pill bg-@(order.IsAvailable ? "primary" : "secondary")"> *@
+                                        @*     @(order.IsAvailable ? "Đã xác nhận" : "Chờ xác nhận") *@
+                                        @* </span> *@
+                                        @* <br /> *@
+                                        @* <span class="badge rounded-pill bg-@(order.IsDelivered ? "success" : "warning") mt-1"> *@
+                                        @*     @(order.IsDelivered ? "Đã giao" : "Đang xử lý") *@
+                                        @* </span> *@
+                                        @* @if (!order.IsDelivered && order.DeliveryDateTime > DateTime.MinValue) *@
+                                        @* { *@
+                                        @*     var now = DateTime.Now; *@
+                                        @*     var timeToDelivery = order.DeliveryDateTime - now; *@
+
+                                        @*     if (timeToDelivery.TotalMinutes <= 60 && timeToDelivery.TotalMinutes > 0) *@
+                                        @*     { *@
+                                        @*         <span class="text-danger ms-2" title="Sắp đến giờ giao hàng!"> *@
+                                        @*             <i class="bi bi-exclamation-triangle-fill"></i> *@
+                                        @*         </span> *@
+                                        @*     } *@
+                                        @*     else if (timeToDelivery.TotalMinutes <= 0) *@
+                                        @*     { *@
+                                        @*         <span class="text-danger ms-2" title="Đã quá giờ giao hàng!"> *@
+                                        @*             <i class="bi bi-exclamation-octagon-fill"></i> *@
+                                        @*         </span> *@
+                                        @*     } *@
+                                        @* } *@
+                                    <td>
+                                        @{
+                                            string statusColor = order.OrderStatus switch
+                                            {
+                                                DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus.ChoXacNhan => "secondary",     // Xám
+                                                DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus.ChoLayHang => "info text-dark", // Xanh nhạt
+                                                DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus.ChoGiaoHang => "warning text-dark", // Vàng
+                                                DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus.DaGiao => "success",           // Xanh lá
+                                                DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus.DaHuy => "danger",             // Đỏ
+                                                _ => "light text-dark"                                                              // Mặc định
+                                            };
+                                        }
+
+                                        <span class="badge bg-@statusColor mt-1 px-3 py-2">
+                                            @order.OrderStatus.ToString()
+                                        </span>
+
+                                    </td>
+
+
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id" class="btn btn-outline-primary btn-sm" title="Xem chi tiết">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-primary"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#updateStatusModal"
+                                                data-order-id="@order.Id"
+                                                data-current-status="@order.OrderStatus">
+                                            <i class="bi bi-pencil-square me-1"></i> Cập nhật
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal cập nhật trạng thái -->
+<div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="updateStatusModalLabel">Cập nhật trạng thái đơn hàng</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+
+            <form asp-area="Admin" asp-controller="Orders" asp-action="UpdateStatus" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="orderIdInput" name="id" />
+
+                    <div class="mb-3">
+                        <label for="statusSelect" class="form-label">Chọn trạng thái mới:</label>
+                        <select id="statusSelect" name="status" class="form-select">
+                            @foreach (var status in Enum.GetValues(typeof(DoAnLapTrinhWeb_QLyTiemBanh.Models.Enums.OrderStatus)))
+                            {
+                                <option value="@status">@status.ToString()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Thêm các thư viện jQuery và DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $.fn.dataTable.ext.errMode = 'none';
+        $('#ordersTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [5, 10, 25, 50],
+            columnDefs: [
+                { orderable: false, targets: 6 } // cột thao tác không cho sắp xếp
+            ],
+            dom: '<"datatable-header d-flex justify-content-between align-items-center mb-3"l f>rt<"datatable-footer d-flex justify-content-between align-items-center mt-3"ip>',
+
+            // Nếu muốn tiếng Việt có thể bật uncomment dòng dưới
+            // language: { url: 'https://cdn.datatables.net/plug-ins/1.13.4/i18n/Vi.json' },
+            // order: [[3, 'asc']] // sắp xếp mặc định theo cột thời gian giao (cột 3)
+        });
+    });
+</script>
+<script>
+    const updateStatusModal = document.getElementById('updateStatusModal');
+    updateStatusModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget;
+        const orderId = button.getAttribute('data-order-id');
+        const currentStatus = button.getAttribute('data-current-status');
+
+        const orderIdInput = document.getElementById('orderIdInput');
+        const statusSelect = document.getElementById('statusSelect');
+
+        orderIdInput.value = orderId;
+        statusSelect.value = currentStatus;
+    });
+</script>
+

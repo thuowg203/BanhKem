@@ -1,0 +1,18 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.ApplicationUser
+
+@{
+    ViewData["Title"] = "Xóa người dùng";
+}
+
+<h1>Xóa người dùng</h1>
+
+<div class="alert alert-warning">
+    <strong>Cảnh báo!</strong> Bạn đang muốn xóa người dùng: <b>@Model.FullName</b> với email <b>@Model.Email</b>. Việc này không thể hoàn tác.
+</div>
+
+<form asp-action="Delete" asp-area="Admin" method="post">
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn btn-danger">Xóa</button>
+    <a href="@Url.Action("Index", "User", new { area = "Admin" })" class="btn btn-secondary">Hủy bỏ</a>
+</form>
+ 

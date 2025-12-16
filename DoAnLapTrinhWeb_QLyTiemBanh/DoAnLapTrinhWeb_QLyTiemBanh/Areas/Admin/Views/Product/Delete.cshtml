@@ -1,0 +1,92 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Product
+
+@{
+    ViewData["Title"] = "Xóa Sản Phẩm";
+
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .card-delete {
+        border: 1px solid #ffd6d3;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(255, 138, 128, 0.1);
+        background-color: #fff8f7;
+    }
+
+    .card-header {
+        background-color: #FF8A80;
+        color: white;
+        font-weight: 600;
+        font-size: 1.5rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        text-align: center;
+    }
+
+    .img-preview {
+        border-radius: 8px;
+        max-width: 200px;
+        border: 1px solid #ddd;
+    }
+
+    dt {
+        color: #444;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card card-delete">
+                <div class="card-header">
+                    @ViewData["Title"]
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        Bạn có chắc chắn muốn <strong>xóa</strong> sản phẩm này không?
+                    </div>
+
+                    <dl class="row">
+                        <dt class="col-sm-4">Tên sản phẩm:</dt>
+                        <dd class="col-sm-8">@Model.Name</dd>
+
+                        <dt class="col-sm-4">Loại sản phẩm:</dt>
+                        <dd class="col-sm-8">@Model.Category?.TenLoai</dd>
+
+                        <dt class="col-sm-4">Mô tả:</dt>
+                        <dd class="col-sm-8">@Model.Description</dd>
+
+                        @* <dt class="col-sm-4">Giá:</dt> *@
+                        @* <dd class="col-sm-8">@Model.Price.ToString("C")</dd> *@
+
+                        @* <dt class="col-sm-4">Số lượng:</dt> *@
+                        @* <dd class="col-sm-8">@Model.Quantity</dd> *@
+
+                        <dt class="col-sm-4">Hình ảnh:</dt>
+                        <dd class="col-sm-8">
+                            @if (!string.IsNullOrEmpty(Model.Image))
+                            {
+                                <img src="@Model.Image" class="card-img-top" style="max-height: 200px; width: auto; max-width: 100%; display: block; margin: 0 auto;" alt="Hình @Model.Name" />
+
+                            }
+                            else
+                            {
+                                <span>Không có hình ảnh</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-area="Admin" asp-controller="Product" asp-action="Delete" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-danger">Xóa</button>
+                            <a asp-action="Index" class="btn btn-secondary ms-2">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

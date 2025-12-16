@@ -1,0 +1,447 @@
+﻿
+@if (TempData["CheckoutError"] != null)
+{
+    <div class="alert alert-danger text-center">
+        @TempData["CheckoutError"]
+    </div>
+}
+@using DoAnLapTrinhWeb_QLyTiemBanh.Extensions
+@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Order
+@{
+    ViewData["Title"] = "Xác nhận đơn hàng";
+    var cart = ViewBag.Cart as DoAnLapTrinhWeb_QLyTiemBanh.Models.ShoppingCart;
+
+    var subtotal = cart?.Items.Sum(i => i.Price * i.Quantity) ?? 0;
+    var shippingFee = 30000;
+    var total = subtotal + shippingFee;
+}
+<style>
+    /* --- Giữ nguyên style như bạn đã cung cấp --- */
+    body {
+        background-color: #f9f9f9;
+    }
+
+    .checkout-container {
+        max-width: 1200px;
+        margin: auto;
+        font-family: Arial, sans-serif;
+    }
+
+    .page-title {
+        color: #4CAF50;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .checkout-section {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+        .checkout-section h5 {
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+        }
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+
+    .form-check-label {
+        font-weight: normal;
+    }
+
+    .text-danger {
+        color: #e53935;
+        font-size: 0.85rem;
+    }
+
+    /* Order Summary Box */
+    .order-summary-box {
+        background: #fff;
+        padding: 25px;
+        border: 1px solid #e9e9e9;
+        border-radius: 8px;
+        position: sticky;
+        top: 20px;
+    }
+
+        .order-summary-box h4 {
+            font-weight: bold;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+        .summary-row.total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #e53935;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .summary-row span:last-child {
+            font-weight: 600;
+        }
+
+    .payment-method {
+        border: 1px solid #ddd;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+
+        .payment-method:has(input:checked) {
+            border-color: #4CAF50;
+            background-color: #f0fff0;
+        }
+
+        .payment-method .form-check-label {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .payment-method .fas {
+            font-size: 1.5rem;
+            color: #4CAF50;
+        }
+
+    .btn-place-order {
+        width: 100%;
+        padding: 12px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        background-color: #4CAF50;
+        border-color: #4CAF50;
+    }
+
+        .btn-place-order:hover {
+            background-color: #45a049;
+            border-color: #45a049;
+        }
+
+    .notes-list {
+        font-size: 0.85rem;
+        color: #666;
+        padding-left: 20px;
+    }
+
+        .notes-list li {
+            margin-bottom: 8px;
+        }
+
+    .text-danger strong {
+        color: #e53935;
+    }
+</style>
+
+<div class="container checkout-container mt-5 mb-5">
+    <h1 class="page-title">Xác nhận đơn hàng</h1>
+    @if (ViewBag.Errors != null)
+    {
+        <div class="alert alert-danger">
+            <strong>Lỗi:</strong>
+            <ul>
+                @foreach (var err in ViewBag.Errors)
+                {
+                    <li>@err</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form asp-action="Checkout" method="post" novalidate>
+        <validation-summary class="text-danger" asp-validation-summary="ModelOnly"></validation-summary>
+
+        <div class="row">
+            <!-- Left Column: Customer and Shipping Info -->
+            <div class="col-lg-7">
+                <!-- Recipient Info -->
+                <div class="checkout-section">
+                    <h5>Thông tin người nhận</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="recipientName" class="form-label">Họ và tên</label>
+                            <input asp-for="RecipientName" type="text" id="recipientName" name="RecipientName" class="form-control" placeholder="VD: Nguyễn Văn A" required />
+                            <span asp-validation-for="RecipientName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="recipientPhone" class="form-label">Số điện thoại</label>
+                            <input asp-for="RecipientPhone" type="tel" id="recipientPhone" name="RecipientPhone" class="form-control" placeholder="VD: 0987654321" required />
+                            <span asp-validation-for="RecipientPhone" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="checkout-section">
+                    <h5>Địa chỉ nhận hàng</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="District" class="form-label">Quận/Huyện</label>
+                            <select asp-for="District" id="districtSelect" class="form-select" required>
+                                <option value="" selected disabled>Chọn quận/huyện...</option>
+                                <!-- Quận sẽ được thêm bằng JavaScript -->
+                            </select>
+                            <span asp-validation-for="District" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Ward" class="form-label">Phường/Xã</label>
+                            <select asp-for="Ward" id="wardSelect" class="form-select" required disabled>
+                                <option value="" selected disabled>Vui lòng chọn quận/huyện trước</option>
+                                <!-- Phường sẽ được thêm bằng JavaScript -->
+                            </select>
+                            <span asp-validation-for="Ward" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="specificAddress" class="form-label">Địa chỉ cụ thể</label>
+                        <input asp-for="SpecificAddress" type="text" id="specificAddress" name="SpecificAddress" class="form-control" placeholder="VD: Số 1 ngõ 2 phố Tây Sơn" required />
+                        <span asp-validation-for="SpecificAddress" class="text-danger"></span>
+                    </div>
+                </div>
+
+                @* <!-- Invoice --> *@
+                @* <div class="checkout-section"> *@
+                @*     <h5>Hóa đơn</h5> *@
+                @*     <div class="form-check"> *@
+                @*         <input asp-for="IncludeInvoice" class="form-check-input" type="checkbox" id="includeInvoice" checked /> *@
+                @*         <label class="form-check-label" for="includeInvoice"> *@
+                @*             Có đính kèm hóa đơn trong đơn hàng *@
+                @*         </label> *@
+                @*     </div> *@
+                @* </div> *@
+
+                <!-- Delivery Time -->
+                <div class="checkout-section">
+                    <h5>Thời gian nhận hàng</h5>
+                    <div class="mb-3">
+                        <label for="deliveryDateTime" class="form-label">Ngày và giờ nhận hàng</label>
+                        <input asp-for="DeliveryDateTime" type="datetime-local" id="deliveryDateTime" name="DeliveryDateTime" class="form-control" />
+                        <span asp-validation-for="DeliveryDateTime" class="text-danger"></span>
+                    </div>
+                </div>
+
+
+                <!-- Notes -->
+                <div class="checkout-section">
+                    <h5>Lưu ý về đơn hàng giao hỏa tốc 1h</h5>
+                    <ul class="notes-list">
+                        <li>Không áp dụng với đơn <strong class="text-danger">đặt sau 19h30</strong>.</li>
+                        <li>Không áp dụng khi <strong class="text-danger">đặt kèm</strong> mẫu bánh không thuộc nhóm 1h.</li>
+                        <li>Thời gian 1h được <strong class="text-danger">tính từ khi</strong> đơn hàng được <strong class="text-danger">xác nhận  lần cuối</strong>.</li>
+                        <li>Nếu chọn <strong class="text-danger">thanh toán chuyển khoản</strong>, vui lòng <strong class="text-danger">chuyển ngay</strong> sau khi đặt hàng để được <strong class="text-danger">tự động xác nhận</strong>.</li>
+                        <li>Nếu không, Savor sẽ cần <strong class="text-danger">liên hệ lại để xác nhận</strong> đơn hàng của bạn ạ.</li>
+                    </ul>
+                </div>
+
+                <!-- Other notes -->
+                <div class="checkout-section">
+                    <h5>Ghi chú khác</h5>
+                    <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Vui lòng KHÔNG ghi nội dung viết chữ ở đây"></textarea>
+                    <span asp-validation-for="Notes" class="text-danger"></span>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Order Summary -->
+            <div class="col-lg-5">
+                <div class="order-summary-box">
+                    <h4>Thanh toán</h4>
+
+                    <!-- Product List with Note Inputs -->
+                    <div style="border-bottom: 1px solid #eee; padding-bottom: 1rem; margin-bottom: 1rem;">
+                        @if (cart != null && cart.Items != null)
+                        {
+                            @for (int i = 0; i < cart.Items.Count; i++)
+                            {
+                                var item = cart.Items[i];
+                                var productIsCake = item.Product?.Category?.TenLoai == "Bánh Sinh Nhật";
+
+                                <div class="mb-3">
+                                    <input type="hidden" name="OrderDetails[@i].ProductId" value="@item.ProductId" />
+                                    <input type="hidden" name="OrderDetails[@i].Quantity" value="@item.Quantity" />
+
+                                    <div>
+                                        <strong>@item.Product?.Name</strong> x @item.Quantity
+                                        <span style="float:right;">@((item.Price * item.Quantity).ToString("N0")) đ</span>
+                                    </div>
+
+                                    @if (productIsCake)
+                                    {
+                                        <div class="mt-2">
+                                            @* Giữ nguyên textarea này *@
+                                            <textarea name="OrderDetails[@i].Notes" class="form-control form-control-sm" rows="2" placeholder="Vui lòng ghi tên người sinh nhật và độ tuổi"></textarea>
+
+                                            @* ----> THÊM DÒNG NÀY ĐỂ HIỂN THỊ LỖI <---- *@
+                                            <span asp-validation-for="OrderDetails[i].Notes" class="text-danger"></span>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Tạm tính</span>
+                        <span>@subtotal.ToString("N0") đ</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Phí vận chuyển</span>
+                        <span>@shippingFee.ToString("N0") đ</span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Tổng cộng</span>
+                        <span>@total.ToString("N0") đ</span>
+                    </div>
+
+                    <!-- Payment Methods -->
+                    <div class="checkout-section mt-3">
+                        <h5>Hình thức thanh toán</h5>
+                        <div class="payment-method">
+                            <input class="form-check-input" type="radio" id="paymentCash" name="PaymentMethod" value="Tiền mặt" checked />
+                            <label class="form-check-label" for="paymentCash">
+                                Tiền mặt
+                                <i class="fas fa-money-bill-wave"></i>
+                            </label>
+                        </div>
+                        <div class="payment-method">
+                            <input class="form-check-input" type="radio" id="paymentVNPAY" name="PaymentMethod" value="VNPAY" />
+                            <label class="form-check-label" for="paymentVNPAY">
+                                Thanh toán qua VNPAY
+                                <i class="fas fa-credit-card"></i>
+                            </label>
+                        </div>
+                        <!-- Giao diện hướng dẫn thanh toán qua VNPAY -->
+                        <div id="vnpayInfo" style="display: none; margin-top: 10px;">
+                            <div class="alert alert-info">
+                                <strong>Thông tin thanh toán qua VNPAY:</strong><br />
+                                Sau khi nhấn “Xác nhận đặt hàng”, bạn sẽ được chuyển đến trang thanh toán bảo mật của VNPAY để hoàn tất giao dịch.
+                            </div>
+                        </div>
+
+
+                        <span  class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-danger btn-place-order mt-3">Xác nhận đặt hàng</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Dữ liệu địa chỉ TP.HCM được đặt trực tiếp ở đây
+            const hcmcData = {
+                "Quận 1": ["Phường Tân Định", "Phường Đa Kao", "Phường Bến Nghé", "Phường Bến Thành", "Phường Nguyễn Thái Bình", "Phường Phạm Ngũ Lão", "Phường Cầu Ông Lãnh", "Phường Cô Giang", "Phường Nguyễn Cư Trinh", "Phường Cầu Kho"],
+                "Quận 3": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường Võ Thị Sáu", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"],
+                "Quận 4": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 6", "Phường 8", "Phường 9", "Phường 10", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 18"],
+                "Quận 5": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"],
+                "Quận 6": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14"],
+                "Quận 7": ["Phường Tân Thuận Đông", "Phường Tân Thuận Tây", "Phường Tân Kiểng", "Phường Tân Hưng", "Phường Bình Thuận", "Phường Tân Quy", "Phường Phú Thuận", "Phường Tân Phú", "Phường Tân Phong", "Phường Phú Mỹ"],
+                "Quận 8": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"],
+                "Quận 10": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"],
+                "Quận 11": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16"],
+                "Quận 12": ["Phường Thạnh Xuân", "Phường Thạnh Lộc", "Phường Hiệp Thành", "Phường Thới An", "Phường Tân Chánh Hiệp", "Phường An Phú Đông", "Phường Tân Thới Hiệp", "Phường Trung Mỹ Tây", "Phường Tân Hưng Thuận", "Phường Đông Hưng Thuận", "Phường Tân Thới Nhất"],
+                "Quận Bình Tân": ["Phường Bình Hưng Hòa", "Phường Bình Hưng Hoà A", "Phường Bình Hưng Hoà B", "Phường Bình Trị Đông", "Phường Bình Trị Đông A", "Phường Bình Trị Đông B", "Phường Tân Tạo", "Phường Tân Tạo A", "Phường An Lạc", "Phường An Lạc A"],
+                "Quận Bình Thạnh": ["Phường 1", "Phường 2", "Phường 3", "Phường 5", "Phường 6", "Phường 7", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 17", "Phường 19", "Phường 21", "Phường 22", "Phường 24", "Phường 25", "Phường 26", "Phường 27", "Phường 28"],
+                "Quận Gò Vấp": ["Phường 1", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 16", "Phường 17"],
+                "Quận Phú Nhuận": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15", "Phường 17"],
+                "Quận Tân Bình": ["Phường 1", "Phường 2", "Phường 3", "Phường 4", "Phường 5", "Phường 6", "Phường 7", "Phường 8", "Phường 9", "Phường 10", "Phường 11", "Phường 12", "Phường 13", "Phường 14", "Phường 15"],
+                "Quận Tân Phú": ["Phường Tân Sơn Nhì", "Phường Tây Thạnh", "Phường Sơn Kỳ", "Phường Tân Quý", "Phường Tân Thành", "Phường Phú Thọ Hoà", "Phường Phú Thạnh", "Phường Phú Trung", "Phường Hoà Thạnh", "Phường Hiệp Tân", "Phường Tân Thới Hoà"],
+                "Thành phố Thủ Đức": ["Phường Linh Xuân", "Phường Bình Chiểu", "Phường Linh Trung", "Phường Tam Bình", "Phường Tam Phú", "Phường Hiệp Bình Phước", "Phường Hiệp Bình Chánh", "Phường Linh Chiểu", "Phường Linh Tây", "Phường Linh Đông", "Phường Bình Thọ", "Phường Trường Thọ", "Phường Long Bình", "Phường Long Thạnh Mỹ", "Phường Tân Phú", "Phường Hiệp Phú", "Phường Tăng Nhơn Phú A", "Phường Tăng Nhơn Phú B", "Phường Phước Long B", "Phường Phước Long A", "Phường Trường Thạnh", "Phường Long Phước", "Phường Long Trường", "Phường Phú Hữu", "Phường Thảo Điền", "Phường An Phú", "Phường An Khánh", "Phường Bình Trưng Đông", "Phường Bình Trưng Tây", "Phường Cát Lái", "Phường Thạnh Mỹ Lợi", "Phường An Lợi Đông", "Phường Thủ Thiêm"],
+                "Huyện Bình Chánh": ["Thị trấn Tân Túc", "Xã Phạm Văn Hai", "Xã Vĩnh Lộc A", "Xã Vĩnh Lộc B", "Xã Bình Lợi", "Xã Lê Minh Xuân", "Xã Tân Nhựt", "Xã Tân Kiên", "Xã Bình Hưng", "Xã Phong Phú", "Xã An Phú Tây", "Xã Hưng Long", "Xã Đa Phước", "Xã Tân Quý Tây", "Xã Bình Chánh", "Xã Quy Đức"],
+                "Huyện Cần Giờ": ["Thị trấn Cần Thạnh", "Xã Bình Khánh", "Xã Tam Thôn Hiệp", "Xã An Thới Đông", "Xã Thạnh An", "Xã Long Hòa", "Xã Lý Nhơn"],
+                "Huyện Củ Chi": ["Thị trấn Củ Chi", "Xã Phú Mỹ Hưng", "Xã An Phú", "Xã Trung Lập Thượng", "Xã An Nhơn Tây", "Xã Nhuận Đức", "Xã Phạm Văn Cội", "Xã Phú Hòa Đông", "Xã Trung Lập Hạ", "Xã Trung An", "Xã Phước Thạnh", "Xã Phước Hiệp", "Xã Tân An Hội", "Xã Phước Vĩnh An", "Xã Thái Mỹ", "Xã Tân Thạnh Tây", "Xã Hòa Phú", "Xã Tân Thạnh Đông", "Xã Bình Mỹ", "Xã Tân Phú Trung", "Xã Tân Thông Hội"],
+                "Huyện Hóc Môn": ["Thị trấn Hóc Môn", "Xã Tân Hiệp", "Xã Nhị Bình", "Xã Đông Thạnh", "Xã Tân Thới Nhì", "Xã Thới Tam Thôn", "Xã Xuân Thới Sơn", "Xã Tân Xuân", "Xã Xuân Thới Đông", "Xã Trung Chánh", "Xã Xuân Thới Thượng", "Xã Bà Điểm"],
+                "Huyện Nhà Bè": ["Thị trấn Nhà Bè", "Xã Phước Kiển", "Xã Phước Lộc", "Xã Nhơn Đức", "Xã Phú Xuân", "Xã Long Thới", "Xã Hiệp Phước"]
+            };
+
+            const districtSelect = document.getElementById('districtSelect');
+            const wardSelect = document.getElementById('wardSelect');
+
+            // 1. Tự động điền danh sách quận khi trang tải xong
+            for (const districtName in hcmcData) {
+                const option = new Option(districtName, districtName);
+                districtSelect.add(option);
+            }
+
+            // 2. Lắng nghe sự kiện khi người dùng thay đổi quận
+            districtSelect.addEventListener('change', function () {
+                const selectedDistrict = this.value;
+                const wards = hcmcData[selectedDistrict] || [];
+
+                // Xóa các phường cũ
+                wardSelect.innerHTML = '<option value="" selected disabled>Chọn phường/xã...</option>';
+
+                // Thêm các phường mới vào
+                wards.forEach(ward => {
+                    const option = new Option(ward, ward);
+                    wardSelect.add(option);
+                });
+
+                // Kích hoạt dropdown phường
+                wardSelect.disabled = false;
+            });
+
+            // (Bạn có thể giữ lại code cho checkbox 'sameAsCustomer' ở đây nếu muốn)
+        });
+
+
+                    // Hiển thị khối VNPAY khi người dùng chọn
+            const vnpayRadio = document.getElementById('paymentVNPAY');
+            const cashRadio = document.getElementById('paymentCash');
+            const vnpayInfo = document.getElementById('vnpayInfo');
+
+            function toggleVNPAYInfo() {
+                if (vnpayRadio.checked) {
+                    vnpayInfo.style.display = 'block';
+                } else {
+                    vnpayInfo.style.display = 'none';
+                }
+            }
+
+            // Gọi lại khi người dùng thay đổi lựa chọn
+            vnpayRadio.addEventListener('change', toggleVNPAYInfo);
+            cashRadio.addEventListener('change', toggleVNPAYInfo);
+
+            // Khi trang vừa tải xong thì gọi để hiển thị đúng trạng thái
+            toggleVNPAYInfo();
+
+    </script>
+
+}

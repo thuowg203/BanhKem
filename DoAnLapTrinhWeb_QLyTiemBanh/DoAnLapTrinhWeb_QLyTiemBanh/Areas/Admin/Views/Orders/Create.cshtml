@@ -1,0 +1,167 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.Order
+@{
+    ViewData["Title"] = "Tạo đơn hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container py-4">
+    <h2 class="mb-4">🧾 Tạo hóa đơn bán hàng tại cửa hàng</h2>
+
+    <form asp-action="Create" method="post" class="needs-validation" novalidate>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Người mua (Email hoặc SĐT)</label>
+
+                <input type="text" id="CustomerSearch" class="form-control" placeholder="Nhập email hoặc số điện thoại" autocomplete="off" />
+                <input type="hidden" name="UserId" id="UserId" />
+
+                <div class="form-text text-muted fst-italic">
+                    * Nhập email hoặc số điện thoại, chọn người dùng phù hợp. Để trống nếu khách lẻ.
+                </div>
+            </div>
+        </div>
+
+
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-bordered table-hover align-middle text-center mb-0">
+                <thead class="table-light sticky-top">
+                    <tr>
+                        <th class="text-start">Sản phẩm</th>
+                        <th style="width: 130px;">Số lượng</th>
+                        <th style="width: 150px;">Giá (đồng)</th>
+                        <th style="width: 150px;">Tạm tính</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in ViewBag.Products)
+                    {
+                        <tr>
+                            <td class="text-start">@product.Name</td>
+                            <td>
+                                <input type="number"
+                                       name="OrderDetails[@product.Id].Quantity"
+                                       value="0"
+                                       min="0"
+                                       class="form-control quantity-input text-center"
+                                       data-productid="@product.Id" />
+                                <input type="hidden" name="OrderDetails[@product.Id].ProductId" value="@product.Id" />
+                                <input type="hidden" name="OrderDetails[@product.Id].Price" value="@product.Price" />
+                            </td>
+                            <td class="text-end">@string.Format("{0:N0}", product.Price)</td>
+                            <td class="text-end subtotal fw-semibold text-primary" id="subtotal-@product.Id">0</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot class="table-light">
+                    <tr>
+                        <td colspan="3" class="text-end fw-bold fs-5">Tổng cộng:</td>
+                        <td class="text-end fw-bold fs-5 text-danger" id="totalPrice">0</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <div class="checkout-section mt-4">
+            <h5>📍 Địa chỉ nhận hàng</h5>
+            <div class="alert alert-info small">
+                Đơn hàng được tạo tại cửa hàng. Mặc định: <strong>lấy tại cửa hàng</strong>.
+            </div>
+            <input type="hidden" name="District" value="Tại cửa hàng" />
+            <input type="hidden" name="Ward" value="Tại cửa hàng" />
+            <input type="hidden" name="SpecificAddress" value="Tại cửa hàng" />
+            <input type="hidden" name="RecipientName" value="Tại cửa hàng" />
+            <input type="hidden" name="RecipientPhone" value="Không có" />
+        </div>
+
+        <div class="mb-4 mt-3">
+            <label asp-for="Notes" class="form-label fw-semibold">Ghi chú</label>
+            <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Nhập ghi chú nếu có..."></textarea>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-lg btn-primary px-5 shadow-sm">
+                <i class="bi bi-check2-circle me-2"></i> Tạo đơn
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function updateTotals() {
+            let total = 0;
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                const productId = input.dataset.productid;
+                const quantity = parseInt(input.value) || 0;
+                const price = parseFloat(document.querySelector(`input[name='OrderDetails[${productId}].Price']`).value);
+                const subtotal = quantity * price;
+                document.getElementById(`subtotal-${productId}`).textContent = subtotal.toLocaleString('vi-VN');
+                total += subtotal;
+            });
+            document.getElementById("totalPrice").textContent = total.toLocaleString('vi-VN');
+        }
+
+        // Cập nhật khi thay đổi số lượng
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            input.addEventListener('input', updateTotals);
+        });
+
+        // Gọi khi load trang
+        updateTotals();
+
+        // Bootstrap validation
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
+
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <script>
+        $(function () {
+            $("#CustomerSearch").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: '@Url.Action("SearchCustomer", "Users", new { area = "Admin" })',
+                        data: { term: request.term },
+                        success: function (data) {
+                            response($.map(data, function (item) {
+                                return {
+                                    label: item.fullName + " (" + item.email + " - " + item.phoneNumber + ")",
+                                    value: item.email, // chỉ hiển thị cho người dùng
+                                    userId: item.id
+                                };
+                            }));
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#CustomerSearch").val(ui.item.label); // hiển thị label
+                    $("#UserId").val(ui.item.userId);        // lưu userId thật
+                    return false;
+                },
+                focus: function (event, ui) {
+                    $("#CustomerSearch").val(ui.item.label);
+                    return false;
+                }
+            });
+
+            $("#CustomerSearch").on("input", function () {
+                if (!$(this).val()) {
+                    $("#UserId").val(""); // nếu xoá input thì cũng xoá userId
+                }
+            });
+        });
+    </script>
+}

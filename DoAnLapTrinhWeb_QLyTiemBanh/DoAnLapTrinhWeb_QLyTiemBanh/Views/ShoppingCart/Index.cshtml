@@ -1,0 +1,96 @@
+﻿@model DoAnLapTrinhWeb_QLyTiemBanh.Models.ShoppingCart
+
+@{
+    ViewData["Title"] = "Shopping Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var subtotal = Model.Items?.Sum(i => i.Price * i.Quantity) ?? 0m;
+}
+
+<div class="container mt-4" style="max-width: 800px;">
+    <h2 class="mb-4">Your Shopping Cart</h2>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <table class="table mb-0">
+                <thead style="background: #f7f8fa;">
+                    <tr>
+                        <th>Product</th>
+                        <th style="text-align: center;">Quantity</th>
+                        <th style="text-align: right;">Unit Price</th>
+                        <th style="text-align: right;">Total Price</th>
+                        <th style="text-align: center;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Items != null && Model.Items.Any())
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            var img = item.ImageUrl ?? item.Product?.Image ?? Url.Content("~/images/default.png");
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <img src="@img"
+                                             alt="/@item.Name" style="width:60px; height:auto; border-radius:4px;" class="me-2" />
+                                        <span>@item.Name</span>
+                                    </div>
+                                </td>
+                                <td style="text-align: center;">
+                                    <div class="d-flex justify-content-center align-items-center">
+                                        <form asp-action="UpdateQuantity" asp-controller="ShoppingCart" method="post" class="me-1">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="change" value="-1" />
+                                            <button class="btn btn-sm btn-outline-secondary">-</button>
+                                        </form>
+                                        <span class="mx-2">@item.Quantity</span>
+                                        <form asp-action="UpdateQuantity" asp-controller="ShoppingCart" method="post" class="ms-1">
+                                            <input type="hidden" name="productId" value="@item.ProductId" />
+                                            <input type="hidden" name="change" value="1" />
+                                            <button class="btn btn-sm btn-outline-secondary">+</button>
+                                        </form>
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">@(item.Price.ToString("C0"))</td>
+                                <td style="text-align: right;">@((item.Price * item.Quantity).ToString("C0"))</td>
+                                <td style="text-align: center;">
+                                    <form asp-action="RemoveItem" asp-controller="ShoppingCart" method="post"
+                                          onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này khỏi giỏ hàng không?');">
+                                        <input type="hidden" name="productId" value="@item.ProductId" />
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">Your cart is empty.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-6 text-start" style="color:#888; font-size:0.95rem;">
+            <strong>Subtotal:</strong>
+        </div>
+        <div class="col-6 text-end" style="font-weight:600;">
+            @subtotal.ToString("C0")
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12 d-flex justify-content-center">
+            <form asp-action="Checkout" asp-controller="ShoppingCart" method="get" style="width: 100%; max-width: 350px;">
+                <button type="submit" class="btn btn-dark w-100" style="border-radius: 20px;">
+                    Proceed to Checkout
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

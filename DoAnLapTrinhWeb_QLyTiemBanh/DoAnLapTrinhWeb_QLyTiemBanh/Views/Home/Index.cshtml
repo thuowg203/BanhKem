@@ -1,0 +1,131 @@
+﻿@model IEnumerable<Product>
+@{
+    ViewData["Title"] = "Home Page";
+    var categories = Model
+        .Where(p => p.Category != null)
+        .Select(p => p.Category.TenLoai)
+        .Distinct()
+        .ToList();
+}
+
+<style>
+    /* Overlay và nút "Thêm nhanh" */
+    .product-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0));
+        text-align: center;
+        opacity: 0;
+        transition: opacity 0.4s ease;
+    }
+
+
+    .product-card:hover .product-overlay {
+        opacity: 1; /* Hiện khi hover */
+    }
+
+    .btn-quick-add {
+        border: 2px solid #a4452e;
+        background-color: transparent;
+        color: #a4452e;
+        font-weight: bold;
+        padding: 0.6rem 2rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+    }
+
+        .btn-quick-add:hover {
+            background-color: #a4452e;
+            color: white;
+        }
+
+</style>
+<div class="main-banner-section">
+    <img src="~/images/banner.png" alt="Ưu đãi đặc biệt các loại bánh" class="main-banner-background-image">
+    <div class="main-banner-color-overlay"></div>
+    <div class="banner-button-container">
+        <a href="#" class="new-item-promo-button">BÁNH SINH NHẬT MỚI!</a>
+    </div>
+</div>
+
+<div class="container">
+    @foreach (var category in categories)
+    {
+        <div class="row">
+            <div class="col-12">
+                <h2 class="home__subtitle">@category.ToUpper()</h2>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4 product-grid">
+            @foreach (var item in Model.Where(p => p.Category?.TenLoai == category))
+            {
+                <div class="col">
+                    <div class="product-card">
+                        <div class="product-image-wrapper">
+                            <a href="@Url.Action("Details", "Product", new { id = item.Id })">
+                                <img src="@item.Image" class="img-fluid" alt="@item.Name" />
+                            </a>
+                            @* @if (!string.IsNullOrEmpty(item.Badge)) *@
+                            @* { *@
+                            @*     <span class="product-badge @item.Badge.ToLower().Replace(" ", "-")"> *@
+                            @*         @item.Badge.ToUpper() *@
+                            @*     </span> *@
+                            @* } *@
+                            <form asp-controller="ShoppingCart" asp-action="AddToCart" method="post" class="product-overlay">
+                                <input type="hidden" name="productId" value="@item.Id" />
+                                <input type="hidden" name="quantity" value="1" />
+                                <button type="submit" class="btn-quick-add">Thêm nhanh</button>
+                            </form>
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-name">
+                                <a href="@Url.Action("Details", "Product", new { id = item.Id })">
+                                    @item.Name
+                                </a>
+                            </h3>
+                            <p class="product-price">@item.Price.ToString("N0")₫</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+
+    <!-- Phần "Hoàn toàn tự nhiên" -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="home__subtitle">Hoàn toàn tự nhiên</h2>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col-md-4 mb-4">
+            <img src="~/images/KHONGHUONGLIEU.png" alt="Trái cây tươi và nguyên liệu tự nhiên" class="img-fluid rounded mb-3" />
+            <h5 class="section-title">KHÔNG HƯƠNG LIỆU NHÂN TẠO VÀ CHẤT BẢO QUẢN</h5>
+            <p class="section-text">
+                Bánh của Bakes sử dụng trái cây tươi địa phương đến từ nông trại như Orlar, chuyên trồng dâu tây organic và hoa ăn được ở Đà Lạt. Không chất bảo quản.
+            </p>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <img src="~/images/baobithanthien.png" alt="Bao bì thân thiện với môi trường" class="img-fluid rounded mb-3" />
+            <h5 class="section-title">BAO BÌ THÂN THIỆN</h5>
+            <p class="section-text">
+                Chúng tôi quan tâm và luôn tìm kiếm các giải pháp thân thiện với môi trường, ví dụ như chiếc túi làm từ sắn, có thể phân hủy sinh học này.
+            </p>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <img src="~/images/tieuchuanhacccp.png" alt="Bếp tuân thủ tiêu chuẩn HACCP" class="img-fluid rounded mb-3" />
+            <h5 class="section-title">TUÂN THỦ TIÊU CHUẨN HACCP</h5>
+            <p class="section-text">
+                Chúng tôi nướng bánh 14 giờ một ngày (2 ca), 7 ngày một tuần ở bếp trung tâm của Bakes tại quận 2. Đây cũng là nơi Bakes nghiên cứu sản phẩm mới!
+            </p>
+        </div>
+    </div>
+</div>

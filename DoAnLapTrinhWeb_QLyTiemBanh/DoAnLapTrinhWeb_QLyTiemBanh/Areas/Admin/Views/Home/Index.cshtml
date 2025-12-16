@@ -1,0 +1,244 @@
+﻿@{
+    ViewData["Title"] = "Bảng điều khiển";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="container-fluid mt-4">
+    <h2 class="mb-4">📊 Bảng điều khiển</h2>
+
+    <!-- THỐNG KÊ NHANH -->
+    <div class="row">
+        <!-- Doanh thu hôm nay -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Doanh thu (Hôm nay)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(((decimal)ViewBag.TodaysRevenue).ToString("N0")) đ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Doanh thu tháng -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Doanh thu (Tháng này)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@(((decimal)ViewBag.MonthlyRevenue).ToString("N0")) đ</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng hôm nay -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Đơn hàng (Hôm nay)</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.TodaysOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clipboard-list fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng chờ xử lý -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Đơn hàng chờ xử lý</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.PendingOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng chờ giao -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Đơn hàng chờ giao</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">@ViewBag.PendingDeliveryOrders</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-shipping-fast fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BIỂU ĐỒ & ĐƠN HÀNG GẦN ĐÂY -->
+    <div class="row">
+        <!-- Biểu đồ doanh thu -->
+        <div class="col-xl-8 col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                    <h6 class="m-0 font-weight-bold text-primary">Tổng quan doanh thu tháng</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-area" style="height: 320px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Đơn hàng gần đây -->
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Đơn hàng gần đây</h6>
+                </div>
+                <div class="card-body" style="max-height: 368px; overflow-y: auto;">
+                    @if (((List<Order>)ViewBag.RecentOrders).Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var order in (List<Order>)ViewBag.RecentOrders)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">
+                                            <strong>Đơn hàng #@order.Id</strong>
+                                        </a>
+                                        <br />
+                                        <small class="text-muted">@order.RecipientName</small>
+                                    </div>
+                                    <span class="badge bg-primary rounded-pill">@order.TotalPrice.ToString("N0") đ</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted mt-3">Chưa có đơn hàng nào.</p>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index">Xem tất cả đơn hàng →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Đơn hàng chờ giao gần đây -->
+    <div class="row">
+        <div class="col-xl-4 col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-danger">Đơn hàng chờ giao</h6>
+                </div>
+                <div class="card-body" style="max-height: 368px; overflow-y: auto;">
+                    @if (((List<Order>)ViewBag.PendingDeliveryOrderList).Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var order in (List<Order>)ViewBag.PendingDeliveryOrderList)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                                    <div>
+                                        <a asp-area="Admin" asp-controller="Orders" asp-action="Details" asp-route-id="@order.Id">
+                                            <strong>Đơn hàng #@order.Id</strong>
+                                        </a>
+                                        <br />
+                                        <small class="text-muted">@order.RecipientName</small>
+                                    </div>
+                                    <span class="badge bg-danger rounded-pill">@order.TotalPrice.ToString("N0") đ</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-center text-muted mt-3">Không có đơn chờ giao.</p>
+                    }
+                </div>
+                <div class="card-footer text-center">
+                    <a asp-area="Admin" asp-controller="Orders" asp-action="Index" asp-route-status="pendingdelivery">Xem tất cả →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const revenueByDayRaw = @Html.Raw(Json.Serialize(ViewBag.RevenueByDay));
+            const chartLabels = revenueByDayRaw.map(item => item.day);
+            const chartData = revenueByDayRaw.map(item => item.revenue);
+
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartLabels,
+                    datasets: [{
+                        label: "Doanh thu",
+                        data: chartData,
+                        backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        pointRadius: 3,
+                        pointBackgroundColor: "rgba(78, 115, 223, 1)",
+                        pointBorderColor: "rgba(78, 115, 223, 1)",
+                        pointHoverRadius: 4,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return value.toLocaleString('vi-VN') + ' đ';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) label += ': ';
+                                    if (context.parsed.y !== null) label += context.parsed.y.toLocaleString('vi-VN') + ' đ';
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

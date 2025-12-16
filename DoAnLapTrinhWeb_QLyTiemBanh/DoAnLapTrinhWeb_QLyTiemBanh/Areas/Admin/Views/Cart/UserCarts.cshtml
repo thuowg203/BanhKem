@@ -1,0 +1,94 @@
+﻿@model IEnumerable<dynamic>
+
+@{
+    ViewData["Title"] = "Giỏ hàng người dùng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .card-custom {
+        border: 1px solid #ffd6d3;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(255, 138, 128, 0.15);
+    }
+
+    .card-header {
+        background-color: #FF8A80;
+        color: white;
+        font-size: 1.4rem;
+        font-weight: 500;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        text-align: center;
+    }
+
+    table {
+        background-color: white;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    th {
+        background-color: #FFE5E0;
+        color: #d84315;
+    }
+
+    td, th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .btn-view {
+        background-color: #FF8A80;
+        border-color: #FF8A80;
+    }
+
+        .btn-view:hover {
+            background-color: #e57373;
+            border-color: #e57373;
+        }
+</style>
+
+<div class="container mt-4">
+    <div class="card card-custom">
+        <div class="card-header">
+            🛒 Danh sách giỏ hàng người dùng
+        </div>
+        <div class="card-body">
+            @if (Model == null || !Model.Any())
+            {
+                <div class="alert alert-info text-center">
+                    Hiện chưa có giỏ hàng nào từ người dùng.
+                </div>
+            }
+            else
+            {
+                <table class="table table-bordered align-middle">
+                    <thead>
+                        <tr>
+                            <th>Email người dùng</th>
+                            <th>Số lượng sản phẩm</th>
+                            <th>Tổng giá trị (VNĐ)</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var cart in Model)
+                        {
+                            <tr>
+                                <td>@cart.UserEmail</td>
+                                <td>@cart.TotalItems</td>
+                                <td>@String.Format("{0:N0} ₫", cart.TotalValue)</td>
+                                <td>
+                                    <a asp-area="Admin" asp-controller="Cart" asp-action="Details" asp-route-userId="@cart.UserId" class="btn btn-view btn-sm">
+                                        <i class="bi bi-eye"></i> Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-body p-4 p-md-5">
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold text-primary">@ViewData["Title"]</h2>
+                        <p class="text-muted">Cập nhật thông tin cá nhân của bạn bên dưới.</p>
+                    </div>
+
+                    <partial name="_StatusMessage" for="StatusMessage" />
+
+                    <form id="profile-form" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3" role="alert"></div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Username" class="form-control" disabled />
+                            <label asp-for="Username" class="form-label"><i class="bi bi-person-circle me-2"></i>Tên đăng nhập</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Email" class="form-control" disabled />
+                            <label asp-for="Input.Email" class="form-label"><i class="bi bi-envelope me-2"></i>Email</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.FullName" class="form-control" placeholder="Họ và tên" />
+                            <label asp-for="Input.FullName" class="form-label"><i class="bi bi-person-lines-fill me-2"></i>Họ và tên</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Address" class="form-control" placeholder="Địa chỉ" />
+                            <label asp-for="Input.Address" class="form-label"><i class="bi bi-geo-alt me-2"></i>Địa chỉ</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input asp-for="Input.Age" class="form-control" placeholder="Tuổi" />
+                            <label asp-for="Input.Age" class="form-label"><i class="bi bi-calendar-heart me-2"></i>Tuổi</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Số điện thoại" />
+                            <label asp-for="Input.PhoneNumber" class="form-label"><i class="bi bi-telephone me-2"></i>Số điện thoại</label>
+                            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button id="update-profile-button" type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">
+                                <i class="bi bi-save me-2"></i>Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

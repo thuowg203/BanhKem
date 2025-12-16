@@ -37,14 +37,14 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // ====================== AUTHENTICATION ======================
-// ⚡ Cookie vẫn là mặc định (để LoginPartial không bị ảnh hưởng)
+// Cookie vẫn là mặc định (để LoginPartial không bị ảnh hưởng)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
     {
         options.LoginPath = "/Identity/Account/Login";
         options.AccessDeniedPath = "/Identity/Account/AccessDenied";
     })
-    // 🧩 JWT chỉ dùng cho API
+    // JWT chỉ dùng cho API
     .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -59,7 +59,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"]))
         };
 
-        // ⚙️ Ngăn redirect về /Account/Login khi thiếu token (cho Flutter)
+        // Ngăn redirect về /Account/Login khi thiếu token (cho Flutter)
         options.Events = new JwtBearerEvents
         {
             OnChallenge = context =>
@@ -83,7 +83,7 @@ builder.Services.AddControllersWithViews()
         options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
 builder.Services.AddRazorPages();
-
+builder.Services.AddScoped<IChatNoteRepository, ChatNoteRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<ICartRepository, CartRepository>();
 builder.Services.AddScoped<ICategoryRepository, EFCategoryRepository>();
@@ -103,12 +103,12 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
-app.UseAuthentication(); // ✅ Cookie + JWT cùng hoạt động
+app.UseAuthentication(); // Cookie + JWT cùng hoạt động
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 
-// 🌐 MVC routes
+// MVC routes
 app.MapControllerRoute(
     name: "Admin",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
@@ -154,7 +154,6 @@ async Task CreateGuestUserIfNotExists(IServiceProvider services)
             await userManager.AddToRoleAsync(guestUser, guestRole);
     }
 }
-
 async Task CreateAdminUserIfNotExists(IServiceProvider services)
 {
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -164,18 +163,30 @@ async Task CreateAdminUserIfNotExists(IServiceProvider services)
     if (!await roleManager.RoleExistsAsync(adminRole))
         await roleManager.CreateAsync(new IdentityRole(adminRole));
 
-    var adminUser = await userManager.FindByNameAsync("admin");
-    if (adminUser == null)
+    // Danh sách admin muốn seed sẵn
+    var adminAccounts = new[]
     {
-        adminUser = new ApplicationUser
+        new { Email = "admin1@tiembanh.local", FullName = "Admin 1" },
+        new { Email = "admin2@tiembanh.local", FullName = "Admin 2" },
+        new { Email = "admin3@tiembanh.local", FullName = "Admin 3" }
+    };
+
+    foreach (var acc in adminAccounts)
+    {
+        var existingUser = await userManager.FindByEmailAsync(acc.Email);
+        if (existingUser == null)
         {
-            UserName = "admin@tiembanh.local",
-            Email = "admin@tiembanh.local",
-            FullName = "Quản trị viên",
-            EmailConfirmed = true
-        };
-        var result = await userManager.CreateAsync(adminUser, "Admin@123");
-        if (result.Succeeded)
-            await userManager.AddToRoleAsync(adminUser, adminRole);
+            var newAdmin = new ApplicationUser
+            {
+                UserName = acc.Email,
+                Email = acc.Email,
+                FullName = acc.FullName,
+                EmailConfirmed = true
+            };
+
+            var result = await userManager.CreateAsync(newAdmin, "Admin@123");
+            if (result.Succeeded)
+                await userManager.AddToRoleAsync(newAdmin, adminRole);
+        }
     }
 }

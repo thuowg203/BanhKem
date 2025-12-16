@@ -1,4 +1,13 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Identity
+@using DoAnLapTrinhWeb_QLyTiemBanh.Models
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var currentUser = await UserManager.GetUserAsync(User);
+    var loggedInUserId = currentUser?.Id; // GUID
+}
+
+@{
     ViewData["Title"] = "Quản lý nhắn tin với người dùng";
 }
 <h2 class="mb-4">💬 Quản lý nhắn tin với người dùng</h2>
@@ -33,6 +42,16 @@
                 </button>
             </div>
         </div>
+        <div class="card mt-3">
+            <div class="card-header bg-light"><strong>Notes của khách</strong></div>
+            <div id="customerNotes" class="card-body" style="height:200px; overflow-y:auto;">
+                <div class="text-muted text-center">Chưa có note nào</div>
+            </div>
+            <div class="card-footer d-flex">
+                <input id="noteInput" type="text" class="form-control me-2" placeholder="Thêm note..." />
+                <button id="sendNoteBtn" class="btn btn-secondary">Ghi note</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -46,7 +65,8 @@
         const onlineCount = document.getElementById("onlineCount");
 
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/chathub?userId=admin@tiembanh.local")
+            //.withUrl("/chathub?userId=admin@tiembanh.local")
+            .withUrl("/chathub?userId=@loggedInUserId")
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
@@ -93,53 +113,27 @@
 
         // Nhận tin nhắn mới từ user
         connection.on("ReceiveMessage", (from, message) => {
+            if (!selectedUser) return;
+
             if (from === selectedUser) {
                 appendMessage(from, message, false);
-            } else {
-                console.log(`📩 Tin nhắn mới từ ${from}: ${message}`);
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
         });
 
-        // Khi chọn user → load lịch sử từ API
-                async function selectUser(userId,userName) {
-            selectedUser = userId;
-            chatTitle.textContent = "Chat với " +userName +" (" + userId + ")";
-            chatBox.innerHTML = "<div class='text-muted'>💬 Đang tải lịch sử trò chuyện...</div>";
-
-            try {
-                // GỌI API ĐỂ LẤY LỊCH SỬ
-                const response = await fetch(`/api/ChatApi/history?userId=${encodeURIComponent(userId)}`);
-                const messages = await response.json();
-
-                chatBox.innerHTML = "";
-                if (messages.length === 0) {
-                    chatBox.innerHTML = "<div class='text-muted'>💬 Chưa có tin nhắn nào với người dùng này.</div>";
-                    return;
-                }
-
-                messages.forEach(m => {
-                    const align = m.isFromAdmin ? "text-end text-primary" : "";
-                    const label = m.isFromAdmin ? "Bạn" : m.from;
-                    chatBox.innerHTML += `<div class="${align}"><b>${label}:</b> ${m.text}</div>`;
-                });
-
-                chatBox.scrollTop = chatBox.scrollHeight;
-            } catch (err) {
-                console.error("❌ Lỗi tải lịch sử:", err);
-                chatBox.innerHTML = "<div class='text-danger'>Không thể tải lịch sử trò chuyện.</div>";
-            }
-        }
 
 
         // Hàm hiển thị tin nhắn
-        function appendMessage(from, text, isFromAdmin) {
-            const align = isFromAdmin ? "text-end text-primary" : "";
-            const label = isFromAdmin ? "Bạn" : from;
-            const msgDiv = document.createElement("div");
-            msgDiv.className = `${align} mb-1`;
-            msgDiv.innerHTML = `<b>${label}:</b> ${text}`;
-            chatBox.appendChild(msgDiv);
+        function appendMessage(from, text, isAdmin) {
+            const align = isAdmin ? "text-end text-primary" : "";
+            const label = isAdmin ? "Bạn" : from;
+
+            const div = document.createElement("div");
+            div.className = `${align} mb-1`;
+            div.innerHTML = `<b>${label}:</b> ${text}`;
+            chatBox.appendChild(div);
         }
+
 
         // 📨 Gửi tin nhắn
         document.getElementById("sendBtn").addEventListener("click", () => {
@@ -159,6 +153,81 @@
             loadAllUsers();
         }).catch(err => console.error(err));
 
+        // ------------------- Notes khách -------------------
+        async function loadCustomerNotes(userId) {
+            const notesContainer = document.getElementById("customerNotes");
+            notesContainer.innerHTML = "<div class='text-muted text-center'>Đang tải...</div>";
+
+            const notes = await connection.invoke("LoadCustomerNotes", userId);
+
+            notesContainer.innerHTML = "";
+            if (!notes || notes.length === 0) {
+                notesContainer.innerHTML = "<div class='text-muted text-center'>Chưa có note nào</div>";
+                return;
+            }
+
+            notes.forEach(note => {
+                const div = document.createElement("div");
+                div.className = "mb-1";
+                div.innerHTML = `<b>${note.adminId}:</b> ${note.content} <small class="text-muted">(${new Date(note.createdAt).toLocaleString()})</small>`;
+                notesContainer.appendChild(div);
+            });
+
+            notesContainer.scrollTop = notesContainer.scrollHeight;
+        }
+
+        connection.on("ReceiveCustomerNote", note => {
+            if (note.userId !== selectedUser) return; // Chỉ hiển thị note của khách đang xem
+
+            const notesContainer = document.getElementById("customerNotes");
+            const div = document.createElement("div");
+            div.className = "mb-1";
+            div.innerHTML = `<b>${note.adminId}:</b> ${note.content} <small class="text-muted">(${new Date(note.createdAt).toLocaleString()})</small>`;
+            notesContainer.appendChild(div);
+            notesContainer.scrollTop = notesContainer.scrollHeight;
+        });
+
+        document.getElementById("sendNoteBtn").addEventListener("click", async () => {
+            const content = document.getElementById("noteInput").value.trim();
+            if (!content || !selectedUser) return;
+
+            await connection.invoke("SendCustomerNote", "@loggedInUserId", selectedUser, content);
+            document.getElementById("noteInput").value = "";
+        });
+
+        // ------------------- Update selectUser -------------------
+        async function selectUser(userId, userName) {
+            selectedUser = userId;
+            chatTitle.textContent = "Chat với " + userName + " (" + userId + ")";
+
+            chatBox.innerHTML = "<div class='text-muted'>💬 Đang tải lịch sử trò chuyện...</div>";
+            customerNotes.innerHTML = "<div class='text-muted text-center'>Đang tải...</div>";
+
+            try {
+                const responseChat = await fetch(`/api/ChatApi/history?userId=${encodeURIComponent(userId)}`);
+                const messages = await responseChat.json();
+
+                chatBox.innerHTML = "";
+                if (messages.length === 0) {
+                    chatBox.innerHTML = "<div class='text-muted'>💬 Chưa có tin nhắn nào với người dùng này.</div>";
+                } else {
+                    messages.forEach(m => {
+                        const align = m.isFromAdmin ? "text-end text-primary" : "";
+                        const label = m.isFromAdmin ? "Bạn" : m.from;
+                        chatBox.innerHTML += `<div class="${align}"><b>${label}:</b> ${m.text}</div>`;
+                    });
+                }
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+                // Load notes khách
+                await loadCustomerNotes(userId);
+
+            } catch (err) {
+                console.error("❌ Lỗi tải lịch sử hoặc note:", err);
+                chatBox.innerHTML = "<div class='text-danger'>Không thể tải lịch sử trò chuyện.</div>";
+                customerNotes.innerHTML = "<div class='text-danger'>Không thể tải note.</div>";
+            }
+        }
     </script>
 }
 

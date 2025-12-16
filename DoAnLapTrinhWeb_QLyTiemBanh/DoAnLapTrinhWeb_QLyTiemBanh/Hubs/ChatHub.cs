@@ -2,17 +2,21 @@
 using System.Collections.Concurrent;
 using DoAnLapTrinhWeb_QLyTiemBanh.Models;
 using DoAnLapTrinhWeb_QLyTiemBanh.Repositories;
+using Microsoft.AspNetCore.Identity;
 
 namespace DoAnLapTrinhWeb_QLyTiemBanh.Hubs
 {
     public class ChatHub : Hub
     {
         private readonly IChatRepository _chatRepo;
+        private readonly IChatNoteRepository _chatNoteRepo;
         private static readonly ConcurrentDictionary<string, string> _onlineUsers = new();
-
-        public ChatHub(IChatRepository chatRepo)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public ChatHub(IChatRepository chatRepo, IChatNoteRepository chatNoteRepo, UserManager<ApplicationUser> userManager)
         {
             _chatRepo = chatRepo;
+            _chatNoteRepo = chatNoteRepo;
+            _userManager = userManager;
         }
 
         public override async Task OnConnectedAsync()
@@ -22,6 +26,18 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Hubs
             if (!string.IsNullOrEmpty(userId))
             {
                 _onlineUsers[userId] = Context.ConnectionId;
+                // Lấy user từ DB
+                var user = await _userManager.FindByIdAsync(userId);
+
+                if (user != null)
+                {
+                    // Nếu user thuộc role Admin → cho vào group
+                    if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    {
+                        await Groups.AddToGroupAsync(Context.ConnectionId, "Admins");
+                        Console.WriteLine($"Admin {user.Email} đã vào nhóm Admins");
+                    }
+                }
 
                 // Gửi danh sách người dùng online cho admin
                 await Clients.All.SendAsync("OnlineUsersUpdated", _onlineUsers.Keys);
@@ -47,7 +63,7 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        // 🟢 Người dùng gửi tin đến admin
+        // Người dùng gửi tin đến admin
         public async Task SendMessageToAdmin(string fromUserId, string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
@@ -56,23 +72,20 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Hubs
             await _chatRepo.SaveMessageAsync(new ChatMessage
             {
                 SenderId = fromUserId,
-                ReceiverId = "admin@tiembanh.local",
+                ReceiverId = "Admins",
                 Message = message,
                 IsFromAdmin = false,
                 SentAt = DateTime.UtcNow
             });
 
-            // Gửi cho admin (nếu đang online)
-            if (_onlineUsers.TryGetValue("admin@tiembanh.local", out string? adminConn))
-            {
-                await Clients.Client(adminConn).SendAsync("ReceiveMessage", fromUserId, message);
-            }
+            await Clients.Group("Admins").SendAsync("ReceiveMessage", fromUserId, message);
+
 
             // Gửi phản hồi cho user
             await Clients.Caller.SendAsync("ReceiveMessage", "Bạn", message);
         }
 
-        // 🟠 Admin gửi tin đến người dùng
+        // Admin gửi tin đến người dùng
         public async Task SendMessageToUser(string toUserId, string message)
         {
             if (string.IsNullOrWhiteSpace(message)) return;
@@ -94,17 +107,46 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Hubs
             }
         }
 
-        // 🟣 Admin có thể load lịch sử khi chọn user
+        // Admin có thể load lịch sử khi chọn user
         public async Task LoadHistory(string userId)
         {
             if (string.IsNullOrEmpty(userId)) return;
 
             var messages = await _chatRepo.GetMessagesAsync(userId);
 
-            Console.WriteLine($"📜 LoadHistory cho {userId}: {messages.Count} tin nhắn");
+            Console.WriteLine($"LoadHistory cho {userId}: {messages.Count} tin nhắn");
 
             await Clients.Caller.SendAsync("LoadChatHistory", messages);
         }
+        // Admin gửi note
+        public async Task SendCustomerNote(string adminId, string userId, string content)
+        {
+            if (string.IsNullOrWhiteSpace(content) || string.IsNullOrEmpty(userId)) return;
+
+            var note = new ChatNote
+            {
+                UserId = userId,
+                AdminId = adminId,
+                Content = content,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _chatNoteRepo.AddNoteAsync(note);
+
+            await Clients.Group("Admins").SendAsync("ReceiveCustomerNote", note);
+        }
+
+
+        // Admin load tất cả note liên quan của từng khách
+        public async Task<List<ChatNote>> LoadCustomerNotes(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return new List<ChatNote>();
+
+            var notes = await _chatNoteRepo.GetNotesByUserIdAsync(userId);
+            return notes;
+        }
+
+
 
 
     }

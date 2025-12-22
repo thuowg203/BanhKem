@@ -1,11 +1,13 @@
 ﻿using DoAnLapTrinhWeb_QLyTiemBanh.Models;
 using DoAnLapTrinhWeb_QLyTiemBanh.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace DoAnLapTrinhWeb_QLyTiemBanh.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = "Admin")]
     public class CartController : Controller
     {
         private readonly ICartRepository _cartRepo;

@@ -91,7 +91,8 @@ builder.Services.AddScoped<IProductRepository, EFProductRepository>();
 builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 builder.Services.AddHostedService<CancelExpiredOrdersService>();
-
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 // ====================== APP PIPELINE ======================
 var app = builder.Build();
 app.UseSession();

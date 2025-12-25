@@ -1,5 +1,6 @@
 ﻿using DoAnLapTrinhWeb_QLyTiemBanh.Models;
 using Microsoft.EntityFrameworkCore;
+using DoAnLapTrinhWeb_QLyTiemBanh.Repositories;
 
 namespace DoAnLapTrinhWeb_QLyTiemBanh.Services
 {

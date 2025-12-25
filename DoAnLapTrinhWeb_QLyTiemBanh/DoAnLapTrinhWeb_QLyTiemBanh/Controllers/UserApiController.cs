@@ -1,6 +1,7 @@
 ﻿using DoAnLapTrinhWeb_QLyTiemBanh.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
 {
@@ -16,19 +17,24 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
             _userManager = userManager;
         }
 
-        // ✅ Trả toàn bộ người dùng (trừ admin)
+        //Trả toàn bộ người dùng (trừ admin)
         [HttpGet("all")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = _userManager.Users
-                .Where(u => u.Email != "admin@tiembanh.local")
+            // Lấy danh sách admin
+            var admins = await _userManager.GetUsersInRoleAsync("Admin");
+            var adminIds = admins.Select(a => a.Id).ToList();
+
+            // Chỉ lấy user KHÔNG phải admin
+            var users = await _userManager.Users
+                .Where(u => !adminIds.Contains(u.Id))
                 .Select(u => new
                 {
                     u.Id,
                     u.FullName,
                     u.Email
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(users);
         }

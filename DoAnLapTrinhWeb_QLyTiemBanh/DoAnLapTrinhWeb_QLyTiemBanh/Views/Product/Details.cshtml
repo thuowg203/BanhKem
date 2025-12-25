@@ -241,12 +241,6 @@
                     <button type="button" onclick="changeQuantity(1)">+</button>
                 </div>
 
-                <!-- Bộ chọn kích thước -->
-                <div class="size-selector d-flex align-items-center my-4">
-                    <span class="size-label">KÍCH CỠ</span>
-                    <button type="button" class="btn btn-size active">12 CM</button>
-                    <button type="button" class="btn btn-size">15 CM</button>
-                </div>
 
                 <!-- Nút thêm vào giỏ hàng -->
                 <button type="submit" class="btn btn-add-to-cart">
@@ -270,6 +264,107 @@
                 </div>
                 <div class="accordion-content" style="display: none;">
                     <p>@(Model.Badge ?? "Sản phẩm không có thông tin đặc biệt.")</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-5">
+        <div class="review-section">
+            <h3 class="mb-4">Khách hàng đánh giá</h3>
+
+            @if (TempData["ReviewError"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    @TempData["ReviewError"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["ReviewSuccess"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    @TempData["ReviewSuccess"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @{
+                var reviews = ViewBag.Reviews as IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview> ?? new List<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview>();
+                int total = reviews.Count();
+                int positiveCount = reviews.Count(r => r.IsPositive);
+                int percent = total > 0 ? (positiveCount * 100 / total) : 100;
+            }
+
+            <div class="mb-5">
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Mức độ hài lòng: <strong>@percent%</strong></span>
+                    <span class="text-muted">@total đánh giá</span>
+                </div>
+                <div class="progress sentiment-bar">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: @percent%"></div>
+                    <div class="progress-bar bg-danger" role="progressbar" style="width: @(100 - percent)%"></div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-5 border-end">
+                    <h5>Viết đánh giá của bạn</h5>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <form asp-action="PostReview" method="post">
+                            <input type="hidden" name="productId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <label class="form-label">Xếp hạng</label>
+                                <select name="rating" class="form-select">
+                                    <option value="5">5 sao - Rất hài lòng</option>
+                                    <option value="4">4 sao - Hài lòng</option>
+                                    <option value="3">3 sao - Bình thường</option>
+                                    <option value="2">2 sao - Tệ</option>
+                                    <option value="1">1 sao - Rất tệ</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Bình luận</label>
+                                <textarea name="comment" class="form-control" rows="4" placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-add-to-cart">GỬI ĐÁNH GIÁ</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <div class="alert alert-light border">
+                            Vui lòng <a href="/Identity/Account/Login" class="text-danger fw-bold">Đăng nhập</a> để để lại đánh giá.
+                        </div>
+                    }
+                </div>
+
+                <div class="col-md-7 ps-md-4">
+                    <div class="review-list" style="max-height: 500px; overflow-y: auto;">
+                        @if (!reviews.Any())
+                        {
+                            <p class="text-muted italic">Chưa có đánh giá nào cho sản phẩm này.</p>
+                        }
+                        else
+                        {
+                            @foreach (var r in reviews)
+                            {
+                                <div class="mb-4 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="fw-bold">@r.User?.UserName</span>
+                                        <span class="badge @(r.IsPositive ? "bg-success" : "bg-danger")">
+                                            @(r.IsPositive ? "Tích cực" : "Tiêu cực")
+                                        </span>
+                                    </div>
+                                    <div class="rating-stars mb-2">
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="bi @(i <= r.Rating ? "bi-star-fill" : "bi-star")"></i>
+                                        }
+                                    </div>
+                                    <p class="mb-1 text-secondary">@r.Comment</p>
+                                    <small class="text-muted">@r.CreatedDate.ToString("dd/MM/yyyy HH:mm")</small>
+                                </div>
+                            }
+                        }
+                    </div>
                 </div>
             </div>
         </div>

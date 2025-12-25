@@ -19,7 +19,7 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Models
         public DbSet<CartItem> CartItems { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<ChatNote> ChatNotes { get; set; }
-
+        public DbSet<ProductReview> ProductReviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

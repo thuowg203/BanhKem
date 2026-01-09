@@ -93,6 +93,10 @@ builder.Services.AddTransient<IEmailSender, SmtpEmailSender>();
 builder.Services.AddHostedService<CancelExpiredOrdersService>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
+
+// Đăng ký Singleton vì việc Train model tốn tài nguyên
+builder.Services.AddSingleton<DoAnLapTrinhWeb_QLyTiemBanh.Services.SentimentService>();
+
 // ====================== APP PIPELINE ======================
 var app = builder.Build();
 app.UseSession();

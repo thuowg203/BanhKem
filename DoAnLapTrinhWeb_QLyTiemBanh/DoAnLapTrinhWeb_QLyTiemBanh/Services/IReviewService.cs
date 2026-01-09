@@ -2,6 +2,6 @@
 {
     public interface IReviewService
     {
-        Task<string> SubmitReviewAsync(int productId, string userId, string comment, int rating);
+        Task<string> SubmitReviewAsync(int productId, string userId, string comment, int rating, bool isPositive);
     }
 }

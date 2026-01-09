@@ -287,7 +287,10 @@
                 </div>
             }
             @{
-                var reviews = ViewBag.Reviews as IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview> ?? new List<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview>();
+                var allReviews = ViewBag.Reviews as IEnumerable<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview> ?? new List<DoAnLapTrinhWeb_QLyTiemBanh.Models.ProductReview>();
+
+                var reviews = allReviews.Where(r => r.IsPositive).ToList();
+
                 int total = reviews.Count();
                 int positiveCount = reviews.Count(r => r.IsPositive);
                 int percent = total > 0 ? (positiveCount * 100 / total) : 100;

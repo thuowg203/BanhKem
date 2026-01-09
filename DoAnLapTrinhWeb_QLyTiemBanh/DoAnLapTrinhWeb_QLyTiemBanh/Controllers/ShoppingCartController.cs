@@ -307,17 +307,17 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
                 Name = c.Name,
                 CategoryName = c.Product?.Category?.TenLoai
             }).ToList();
-            for (int i = 0; i < cart.Count; i++)
-            {
-                var item = cart[i];
-                var cate = item.CategoryName?.Trim().ToLower();
-                if ((cate?.Contains("bánh sinh nhật") == true || cate?.Contains("bánh kem") == true)
-                    && string.IsNullOrWhiteSpace(item.Notes))
-                {
-                    ModelState.AddModelError($"OrderDetails[{i}].Notes",
-                        $"Vui lòng nhập tên & tuổi cho bánh sinh nhật '{item.Name}'.");
-                }
-            }
+            //for (int i = 0; i < cart.Count; i++)
+            //{
+            //    var item = cart[i];
+            //    var cate = item.CategoryName?.Trim().ToLower();
+            //    if ((cate?.Contains("bánh sinh nhật") == true || cate?.Contains("bánh kem") == true)
+            //        && string.IsNullOrWhiteSpace(item.Notes))
+            //    {
+            //        ModelState.AddModelError($"OrderDetails[{i}].Notes",
+            //            $"Vui lòng nhập tên & tuổi cho bánh sinh nhật '{item.Name}'.");
+            //    }
+            //}
 
 
             if (model.DeliveryDateTime == null)

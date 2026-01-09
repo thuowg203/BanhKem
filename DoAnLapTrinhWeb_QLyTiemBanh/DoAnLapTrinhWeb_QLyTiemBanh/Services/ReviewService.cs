@@ -15,8 +15,10 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Services
             _context = context;
         }
 
-        public async Task<string> SubmitReviewAsync(int productId, string userId, string comment, int rating)
+        // Đã thêm tham số 'bool isPositive' vào đây
+        public async Task<string> SubmitReviewAsync(int productId, string userId, string comment, int rating, bool isPositive)
         {
+            // 1. Kiểm tra đã mua hàng chưa (Logic nghiệp vụ giữ nguyên)
             var hasPurchased = await _context.OrderDetails
                 .AnyAsync(od => od.ProductId == productId && od.Order.UserId == userId);
 
@@ -25,18 +27,19 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Services
                 return "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua hàng.";
             }
 
-            string[] negativeWords = { "tệ", "dở", "kém", "không ngon", "thất vọng", "xấu" };
-            bool isPositive = (rating >= 4) && !negativeWords.Any(w => comment.ToLower().Contains(w));
-
+            // 2. Tạo đối tượng Review
+            // Lưu ý: Chúng ta không còn lọc từ khóa thủ công ở đây nữa
+            // vì Controller đã dùng AI để quyết định biến 'isPositive' rồi.
             var review = new ProductReview
             {
                 ProductId = productId,
                 UserId = userId,
                 Comment = comment,
                 Rating = rating,
-                IsPositive = isPositive,
+                IsPositive = isPositive, // Nhận kết quả từ AI
                 CreatedDate = DateTime.Now
             };
+
             try
             {
                 await _reviewRepository.AddAsync(review);

@@ -41,6 +41,9 @@ dependencies:
   geolocator: ^12.0.0 #lấy vị trí địa lý của người dùng trên cả iOS và Android
   geocoding: ^4.0.0 #chuyển đổi địa chỉ thành tọa độ (vĩ độ, kinh độ) để hiển thị trên bản đồ hoặc ngược lại
   url_launcher: ^6.3.0
+
+  google_generative_ai: ^0.4.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

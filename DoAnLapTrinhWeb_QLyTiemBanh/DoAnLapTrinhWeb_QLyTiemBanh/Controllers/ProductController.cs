@@ -13,16 +13,19 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
         private readonly ICategoryRepository _categoryRepository;
         private readonly IReviewRepository _reviewRepository;
         private readonly IReviewService _reviewService;
+        private readonly SentimentService _sentimentService;
         public ProductController(
             IProductRepository productRepository,
             ICategoryRepository categoryRepository,
             IReviewRepository reviewRepository,
-            IReviewService reviewService)
+            IReviewService reviewService,
+            SentimentService sentimentService)
         {
             _productRepository = productRepository;
             _categoryRepository = categoryRepository;
             _reviewRepository = reviewRepository;
             _reviewService = reviewService;
+            _sentimentService = sentimentService;
         }
         // Hiển thị danh sách sản phẩm 
         public async Task<IActionResult> Index()
@@ -50,14 +53,27 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
         {
             if (string.IsNullOrWhiteSpace(comment))
             {
+                TempData["ReviewError"] = "Nội dung bình luận không được để trống.";
                 return RedirectToAction("Details", new { id = productId });
             }
 
-            // Lấy ID của người dùng đang đăng nhập
+            // --- KIỂM TRA BẰNG AI ---
+            var prediction = _sentimentService.Predict(comment);
+
+           
+            // Nếu AI đoán là Tiêu cực (Prediction == false) => Chặn luôn, không cần quan tâm độ tin cậy bao nhiêu
+            if (!prediction.Prediction)
+            {
+                TempData["ReviewError"] = "Bình luận của bạn chứa nội dung không phù hợp hoặc tiêu cực. Vui lòng kiểm tra lại!";
+                // Dừng luôn, không lưu vào DB nữa
+                return RedirectToAction("Details", new { id = productId });
+            }
+            // -------------------------
+
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Gọi Service và nhận kết quả trả về dạng chuỗi
-            var result = await _reviewService.SubmitReviewAsync(productId, userId, comment, rating);
+            // Vì đã chặn ở trên, nên nếu chạy xuống đây thì mặc định là Tích cực (true)
+            var result = await _reviewService.SubmitReviewAsync(productId, userId, comment, rating, true);
 
             if (result == "Success")
             {
@@ -65,7 +81,6 @@ namespace DoAnLapTrinhWeb_QLyTiemBanh.Controllers
             }
             else
             {
-                // Gửi thông báo lỗi (ví dụ: "Bạn chưa mua hàng") sang View
                 TempData["ReviewError"] = result;
             }
 
